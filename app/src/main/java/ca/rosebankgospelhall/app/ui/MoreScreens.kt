@@ -40,6 +40,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -136,6 +137,10 @@ fun SettingsScreen(vm: AppViewModel, onBack: () -> Unit, enableNotify: () -> Uni
     val scale by vm.textScale.collectAsState()
     val notify by vm.notify.collectAsState()
     val body = MaterialTheme.typography.bodyLarge
+    val ctx = LocalContext.current
+    val version = remember {
+        runCatching { ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionName }.getOrNull().orEmpty()
+    }
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         topBar = { TopAppBar(title = { Text("Settings") }, navigationIcon = { BackButton(onBack) }) },
@@ -169,7 +174,7 @@ fun SettingsScreen(vm: AppViewModel, onBack: () -> Unit, enableNotify: () -> Uni
             )
             Group("About")
             Text(
-                "Posts and pages come from rosebankgospelhall.ca. Version 1.2.",
+                "Posts and pages come from rosebankgospelhall.ca. Version $version.",
                 style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
             )

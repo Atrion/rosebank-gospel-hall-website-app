@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.NotificationsActive
@@ -96,6 +97,7 @@ fun HomeScreen(
     val saved by vm.bookmarks.collectAsState()
     val notify by vm.notify.collectAsState()
     val dismissed by vm.promptDismissed.collectAsState()
+    val showWelcome by vm.showWelcome.collectAsState()
     val scroll = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val ctx = LocalContext.current
     val cs = MaterialTheme.colorScheme
@@ -123,9 +125,9 @@ fun HomeScreen(
     ) { pad ->
         PullToRefreshBox(isRefreshing = loading, onRefresh = { vm.refresh() }, modifier = Modifier.padding(pad)) {
             LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
-                item { Hero(onContact = { onNav("contact") }) }
+                if (showWelcome) item { WelcomeCard(onClose = { vm.dismissWelcome() }) }
 
-                if (!notify && !dismissed) {
+                if (!showWelcome && !notify && !dismissed) {
                     item {
                         Card(
                             Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
@@ -239,29 +241,36 @@ fun HomeScreen(
 }
 
 @Composable
-private fun Hero(onContact: () -> Unit) {
-    Column(
+private fun WelcomeCard(onClose: () -> Unit) {
+    Box(
         Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
-            .clip(MaterialTheme.shapes.large).background(BurgundyDeep).padding(24.dp),
+            .clip(MaterialTheme.shapes.large).background(BurgundyDeep),
     ) {
-        Text(
-            "Welcome",
-            color = Color.White,
-            fontFamily = FontFamily.Serif,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 30.sp,
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            "Gospel messages, videos and audio from Rosebank Gospel Hall.",
-            color = Color.White.copy(alpha = 0.85f),
-            style = MaterialTheme.typography.bodyLarge,
-        )
-        Spacer(Modifier.height(18.dp))
-        Button(
-            onClick = onContact,
-            colors = ButtonDefaults.buttonColors(containerColor = Gold, contentColor = BurgundyDeep),
-        ) { Text("Contact us") }
+        Column(Modifier.padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 20.dp)) {
+            Text(
+                "Welcome",
+                color = Color.White,
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 30.sp,
+                modifier = Modifier.padding(end = 40.dp),
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "Read, watch and listen to messages from Rosebank Gospel Hall. " +
+                    "Tap the bookmark on any post to save it for later.",
+                color = Color.White.copy(alpha = 0.85f),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            Spacer(Modifier.height(18.dp))
+            Button(
+                onClick = onClose,
+                colors = ButtonDefaults.buttonColors(containerColor = Gold, contentColor = BurgundyDeep),
+            ) { Text("Get started") }
+        }
+        IconButton(onClick = onClose, modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)) {
+            Icon(Icons.Filled.Close, contentDescription = "Close welcome", tint = Color.White)
+        }
     }
 }
 

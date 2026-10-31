@@ -9,6 +9,10 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+// Release number in hundredths: 1 = version 0.01, 2 = version 0.02, and so on.
+// Raise it by 1 for every new release; the version name and code follow automatically.
+val releaseNumber = 1
+
 // Launcher icon: built from the website's favicon every build.
 // Put your own square image at icon/logo.png to override the download.
 val launcherIconDir = layout.buildDirectory.dir("generated/launcher/res").get().asFile
@@ -43,8 +47,8 @@ val generateLauncherIcon = tasks.register("generateLauncherIcon") {
             return null
         }
 
-        val dst = File(out, "drawable-nodpi/ic_launcher_foreground.png")
-        val colorFile = File(out, "values/launcher_background.xml")
+        val dst = File(out, "drawable-nodpi/ic_launcher_logo.png")
+        val colorFile = File(out, "values/launcher_logo_background.xml")
         val src = load()
         if (src == null) {
             if (project.hasProperty("requireIcon")) {
@@ -101,7 +105,7 @@ val generateLauncherIcon = tasks.register("generateLauncherIcon") {
         colorFile.parentFile.mkdirs()
         ImageIO.write(canvas, "png", dst)
         colorFile.writeText(
-            "<resources>\n    <color name=\"ic_launcher_background\">$background</color>\n</resources>\n",
+            "<resources>\n    <color name=\"ic_launcher_logo_bg\">$background</color>\n</resources>\n",
         )
     }
 }
@@ -114,8 +118,8 @@ android {
         applicationId = "ca.rosebankgospelhall.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.2"
+        versionCode = releaseNumber
+        versionName = "${releaseNumber / 100}.${"%02d".format(releaseNumber % 100)}"
     }
 
     sourceSets.getByName("main").res.srcDir(launcherIconDir)

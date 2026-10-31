@@ -21,6 +21,10 @@ class Prefs(ctx: Context) {
         get() = sp.getBoolean("prompt_dismissed", false)
         set(v) = sp.edit().putBoolean("prompt_dismissed", v).apply()
 
+    var welcomeSeen: Boolean
+        get() = sp.getBoolean("welcome_seen", false)
+        set(v) = sp.edit().putBoolean("welcome_seen", v).apply()
+
     var lastSeenMillis: Long
         get() = sp.getLong("last_seen", 0L)
         set(v) = sp.edit().putLong("last_seen", v).apply()
