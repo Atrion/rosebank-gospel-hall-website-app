@@ -245,20 +245,23 @@ private fun Hero(onContact: () -> Unit) {
             .clip(MaterialTheme.shapes.large).background(BurgundyDeep).padding(24.dp),
     ) {
         Text(
-            Site.VERSE,
+            "Welcome",
             color = Color.White,
             fontFamily = FontFamily.Serif,
-            fontStyle = FontStyle.Italic,
-            fontSize = 21.sp,
-            lineHeight = 31.sp,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 30.sp,
         )
-        Spacer(Modifier.height(14.dp))
-        Text(Site.VERSE_REF, color = Gold, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.titleSmall)
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "Gospel messages, videos and audio from Rosebank Gospel Hall.",
+            color = Color.White.copy(alpha = 0.85f),
+            style = MaterialTheme.typography.bodyLarge,
+        )
         Spacer(Modifier.height(18.dp))
         Button(
             onClick = onContact,
             colors = ButtonDefaults.buttonColors(containerColor = Gold, contentColor = BurgundyDeep),
-        ) { Text("Ask us a question") }
+        ) { Text("Contact us") }
     }
 }
 

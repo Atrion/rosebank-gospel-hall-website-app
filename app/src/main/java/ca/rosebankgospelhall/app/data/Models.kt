@@ -16,8 +16,6 @@ object Site {
     const val EMAIL = "bwthib@gmail.com"
     const val YOUTUBE = "https://www.youtube.com/@brodyt983/"
     const val LOGO = "https://i0.wp.com/rosebankgospelhall.ca/wp-content/uploads/2026/04/Rosebank_logo_trans-1.png?fit=270%2C270&ssl=1"
-    const val VERSE_REF = "1 Corinthians 15:3-4"
-    const val VERSE = "For I delivered unto you first of all that which I also received, how that Christ died for our sins according to the scriptures; and that he was buried, and that he rose again the third day according to the scriptures."
 }
 
 data class Term(val id: Int, val name: String, val slug: String, val taxonomy: String)
@@ -50,7 +48,7 @@ data class Post(
 
 private val DATE_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.getDefault())
 
-data class PageData(val title: String, val html: String)
+data class PageData(val title: String, val html: String, val scraped: Boolean = false)
 
 sealed interface Block {
     data class Para(val text: AnnotatedString) : Block

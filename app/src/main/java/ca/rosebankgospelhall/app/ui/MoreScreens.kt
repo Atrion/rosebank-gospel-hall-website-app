@@ -156,7 +156,7 @@ fun SettingsScreen(vm: AppViewModel, onBack: () -> Unit, enableNotify: () -> Uni
                 modifier = Modifier.padding(horizontal = 20.dp),
             )
             Text(
-                "For I delivered unto you first of all that which I also received.",
+                "This is how the text in posts will look.",
                 style = body.copy(fontSize = body.fontSize * scale, lineHeight = body.fontSize * scale * 1.55f),
                 modifier = Modifier.padding(horizontal = 20.dp),
             )
@@ -169,7 +169,7 @@ fun SettingsScreen(vm: AppViewModel, onBack: () -> Unit, enableNotify: () -> Uni
             )
             Group("About")
             Text(
-                "Posts and pages come from rosebankgospelhall.ca. Version 1.1.",
+                "Posts and pages come from rosebankgospelhall.ca. Version 1.2.",
                 style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
             )

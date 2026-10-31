@@ -20,11 +20,15 @@ import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -61,10 +65,9 @@ import ca.rosebankgospelhall.app.data.Site
 import ca.rosebankgospelhall.app.data.PageData
 import org.jsoup.Jsoup
 
-private val chips = listOf(
-    "" to "All", "videos" to "Videos", "audio" to "Audio", "articles" to "Articles",
-    "testimony" to "Testimonies", "international" to "International",
-)
+private val sortOptions = listOf("Newest first", "Oldest first", "Title A to Z", "Title Z to A")
+
+private data class Topic(val slug: String, val name: String, val count: Int)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,13 +79,33 @@ fun PostsScreen(vm: AppViewModel, title: String, preset: String?, initialFilter:
     var filter by remember(initialFilter) { mutableStateOf(initialFilter) }
     var query by remember { mutableStateOf("") }
     var searching by remember { mutableStateOf(false) }
+    var sort by remember { mutableStateOf(0) }
+    var sortOpen by remember { mutableStateOf(false) }
     val focus = remember { FocusRequester() }
-    val active = preset ?: filter
 
-    val filtered = remember(posts, active, query) {
-        posts.filter { p ->
-            p.matches(active) && (query.isBlank() ||
+    // Listen and Watch only look at audio / video posts; Posts looks at everything.
+    val base = remember(posts, preset) { if (preset == null) posts else posts.filter { it.matches(preset) } }
+
+    // Every category and tag found on the loaded posts becomes a filter.
+    val topics = remember(base, preset) {
+        base.flatMap { it.terms }
+            .filter { it.slug.isNotBlank() && !it.slug.equals("uncategorized", true) }
+            .filter { preset == null || !(it.slug.equals(preset, true) || (preset == "videos" && it.slug.equals("video", true))) }
+            .distinctBy { it.slug.lowercase() }
+            .map { t -> Topic(t.slug, t.name, base.count { it.matches(t.slug) }) }
+            .sortedWith(compareByDescending<Topic> { it.count }.thenBy { it.name.lowercase() })
+    }
+
+    val shown = remember(base, filter, query, sort) {
+        val list = base.filter { p ->
+            p.matches(filter) && (query.isBlank() ||
                 p.title.contains(query, ignoreCase = true) || p.excerpt.contains(query, ignoreCase = true))
+        }
+        when (sort) {
+            1 -> list.sortedBy { it.dateMillis }
+            2 -> list.sortedBy { it.title.lowercase() }
+            3 -> list.sortedByDescending { it.title.lowercase() }
+            else -> list.sortedByDescending { it.dateMillis }
         }
     }
     LaunchedEffect(searching) { if (searching) focus.requestFocus() }
@@ -110,19 +133,38 @@ fun PostsScreen(vm: AppViewModel, title: String, preset: String?, initialFilter:
             } else {
                 TopAppBar(
                     title = { Text(title, style = MaterialTheme.typography.titleLarge) },
-                    actions = { IconButton(onClick = { searching = true }) { Icon(Icons.Filled.Search, "Search") } },
+                    actions = {
+                        IconButton(onClick = { searching = true }) { Icon(Icons.Filled.Search, "Search") }
+                        Box {
+                            IconButton(onClick = { sortOpen = true }) { Icon(Icons.AutoMirrored.Filled.Sort, "Sort") }
+                            DropdownMenu(expanded = sortOpen, onDismissRequest = { sortOpen = false }) {
+                                sortOptions.forEachIndexed { i, label ->
+                                    DropdownMenuItem(
+                                        text = { Text(label) },
+                                        onClick = { sort = i; sortOpen = false },
+                                        leadingIcon = { if (sort == i) Icon(Icons.Filled.Check, null) },
+                                    )
+                                }
+                            }
+                        }
+                    },
                 )
             }
         },
     ) { pad ->
         Column(Modifier.padding(pad)) {
-            if (preset == null) {
+            if (topics.isNotEmpty()) {
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    items(chips) { (slug, label) ->
-                        FilterChip(selected = active == slug, onClick = { filter = slug }, label = { Text(label) })
+                    item { FilterChip(selected = filter.isBlank(), onClick = { filter = "" }, label = { Text("All") }) }
+                    items(topics, key = { it.slug }) { t ->
+                        FilterChip(
+                            selected = filter.equals(t.slug, true),
+                            onClick = { filter = t.slug },
+                            label = { Text("${t.name} (${t.count})") },
+                        )
                     }
                 }
             }
@@ -136,7 +178,7 @@ fun PostsScreen(vm: AppViewModel, title: String, preset: String?, initialFilter:
                             }
                         }
                     }
-                    if (filtered.isEmpty()) {
+                    if (shown.isEmpty()) {
                         item {
                             if (loading && posts.isEmpty()) {
                                 Box(Modifier.fillMaxWidth().padding(48.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
@@ -151,7 +193,7 @@ fun PostsScreen(vm: AppViewModel, title: String, preset: String?, initialFilter:
                             }
                         }
                     }
-                    items(filtered, key = { it.id }) { p ->
+                    items(shown, key = { it.id }) { p ->
                         PostCard(
                             p, saved = p.id in saved, onClick = { onPost(p.id) }, onSave = { vm.toggleBookmark(p.id) },
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -369,7 +411,8 @@ fun PageScreen(vm: AppViewModel, slug: String, title: String, onBack: () -> Unit
             }
             is PageState.Ready -> {
                 val blocks = remember(s.page, linkColor) {
-                    HtmlParser.parse(s.page.html, "https://rosebankgospelhall.ca/$slug/", linkColor, dedupe = true)
+                    val parsed = HtmlParser.parse(s.page.html, "https://rosebankgospelhall.ca/$slug/", linkColor, dedupe = true)
+                    if (s.page.scraped) HtmlParser.trimFooter(parsed) else parsed
                 }
                 if (blocks.isEmpty()) {
                     Box(Modifier.padding(pad).fillMaxSize(), contentAlignment = Alignment.Center) {

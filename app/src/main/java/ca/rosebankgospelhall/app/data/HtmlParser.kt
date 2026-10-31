@@ -42,6 +42,35 @@ object HtmlParser {
         }
     }
 
+    private fun textOf(b: Block): String = when (b) {
+        is Block.Para -> b.text.text
+        is Block.Heading -> b.text.text
+        is Block.Quote -> b.text.text
+        is Block.Bullet -> b.text.text
+        is Block.Caption -> b.text.text
+        is Block.Button -> b.label
+        else -> ""
+    }
+
+    private val footerStrong = Regex("©|all rights reserved|powered by|gravel hill|subscribe", RegexOption.IGNORE_CASE)
+    private val footerWeak = Regex("western rd|39049|bwthib|\\b902\\b", RegexOption.IGNORE_CASE)
+
+    /** Drops site footer text (contact lines, copyright, sign-up) that a copied page may carry at the end. */
+    fun trimFooter(blocks: List<Block>): List<Block> {
+        var cut = blocks.size
+        for ((i, b) in blocks.withIndex()) {
+            val t = textOf(b)
+            if (footerStrong.containsMatchIn(t) || (i >= blocks.size - 8 && footerWeak.containsMatchIn(t))) {
+                cut = i
+                break
+            }
+        }
+        while (cut > 0 && (blocks[cut - 1] is Block.Heading || blocks[cut - 1] is Block.Divider ||
+                blocks[cut - 1] is Block.Image || blocks[cut - 1] is Block.Caption)
+        ) cut--
+        return blocks.subList(0, cut)
+    }
+
     private fun trim(b: AnnotatedString.Builder): AnnotatedString = trim(b.toAnnotatedString())
 
     private fun trim(t: AnnotatedString): AnnotatedString {

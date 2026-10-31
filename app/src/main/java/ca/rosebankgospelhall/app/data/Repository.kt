@@ -74,21 +74,29 @@ class Repository(private val ctx: Context) {
         if (result == null) result = rest?.takeIf { textLength(it.html) >= 20 }
         val good = result
         if (good != null) {
-            runCatching { saved.writeText(JSONObject().put("t", good.title).put("h", good.html).toString()) }
+            runCatching { saved.writeText(JSONObject().put("t", good.title).put("h", good.html).put("s", good.scraped).toString()) }
             return@withContext good
         }
         runCatching {
             val o = JSONObject(saved.readText())
-            PageData(o.getString("t"), o.getString("h"))
+            PageData(o.getString("t"), o.getString("h"), o.optBoolean("s"))
         }.getOrElse { throw IOException("Page unavailable") }
     }
 
     private fun scrapePage(slug: String): PageData {
         val url = "${Site.BASE}/$slug/"
         val doc = Jsoup.parse(get(url), url)
-        doc.select("header,footer,nav,aside,script,style,noscript,form,svg,[role=navigation],[class*=navigation],[class*=menu]").remove()
-        val main = doc.selectFirst("main") ?: doc.selectFirst(".wp-site-blocks") ?: doc.body()
-        return PageData(doc.title().substringBefore(" - "), main.html())
+        doc.select(
+            "header,footer,nav,aside,script,style,noscript,form,svg,[role=navigation]," +
+                "[class*=navigation],[class*=menu],[class*=footer],[id*=footer],[class*=header],[id*=header]",
+        ).remove()
+        val content = doc.selectFirst(".wp-block-post-content")
+            ?: doc.selectFirst(".entry-content")
+            ?: doc.selectFirst("[class*=post-content]")
+            ?: doc.selectFirst("main")
+            ?: doc.selectFirst(".wp-site-blocks")
+            ?: doc.body()
+        return PageData(doc.title().substringBefore(" - "), content.html(), scraped = true)
     }
 
     /** Reads the live post page and returns any videos on it (used when the API content has none). */

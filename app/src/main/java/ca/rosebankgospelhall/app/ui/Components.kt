@@ -356,30 +356,7 @@ private fun BlockView(b: Block, audio: AudioController, postTitle: String, art: 
                 .clip(MaterialTheme.shapes.medium).background(cs.surfaceVariant),
         )
         is Block.Audio -> AudioPlayerCard(audio, b.url, b.title ?: postTitle, art, postId)
-        is Block.Video -> Card(
-            onClick = { uri.openUri(b.url) },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
-            shape = MaterialTheme.shapes.large,
-            colors = CardDefaults.cardColors(containerColor = cs.surfaceContainerHigh),
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                if (b.thumb != null) {
-                    AsyncImage(
-                        model = b.thumb, contentDescription = null, contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f),
-                    )
-                } else {
-                    Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).background(BurgundyDeep))
-                }
-                Surface(shape = CircleShape, color = Color.Black.copy(alpha = 0.6f)) {
-                    Icon(Icons.Filled.PlayArrow, null, tint = Color.White, modifier = Modifier.padding(14.dp).size(36.dp))
-                }
-            }
-            Text(
-                b.label, style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            )
-        }
+        is Block.Video -> VideoBlock(b, audio)
         is Block.Button -> Box(Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
             FilledTonalButton(onClick = { uri.openUri(b.url) }) { Text(b.label) }
         }
