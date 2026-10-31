@@ -64,7 +64,7 @@ private val pageTitles = mapOf(
     "free-food-hamper" to "Free food hamper",
 )
 
-private fun openCustomTab(ctx: Context, url: String) {
+internal fun openCustomTab(ctx: Context, url: String) {
     try {
         CustomTabsIntent.Builder().setShowTitle(true).build().launchUrl(ctx, Uri.parse(url))
     } catch (_: Exception) {
@@ -112,6 +112,10 @@ fun AppRoot(vm: AppViewModel, startPostId: Int?, onStartConsumed: () -> Unit) {
     val handler = remember(posts, nav) {
         object : UriHandler {
             override fun openUri(uri: String) {
+                if (uri.startsWith("ext:")) {
+                    openCustomTab(ctx, uri.removePrefix("ext:"))
+                    return
+                }
                 val u = uri.trim()
                 val bare = u.removePrefix("https://").removePrefix("http://").removePrefix("www.").trimEnd('/')
                 val host = "rosebankgospelhall.ca"

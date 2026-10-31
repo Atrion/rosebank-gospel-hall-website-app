@@ -59,8 +59,9 @@ object HtmlParser {
     fun trimFooter(blocks: List<Block>): List<Block> {
         var cut = blocks.size
         for ((i, b) in blocks.withIndex()) {
+            if (i < blocks.size / 2) continue // a footer only ever appears in the second half
             val t = textOf(b)
-            if (footerStrong.containsMatchIn(t) || (i >= blocks.size - 8 && footerWeak.containsMatchIn(t))) {
+            if (footerStrong.containsMatchIn(t) || (i >= blocks.size - 4 && footerWeak.containsMatchIn(t))) {
                 cut = i
                 break
             }
@@ -68,7 +69,7 @@ object HtmlParser {
         while (cut > 0 && (blocks[cut - 1] is Block.Heading || blocks[cut - 1] is Block.Divider ||
                 blocks[cut - 1] is Block.Image || blocks[cut - 1] is Block.Caption)
         ) cut--
-        return blocks.subList(0, cut)
+        return if (cut <= 0) blocks else blocks.subList(0, cut)
     }
 
     private fun trim(b: AnnotatedString.Builder): AnnotatedString = trim(b.toAnnotatedString())

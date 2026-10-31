@@ -9,6 +9,7 @@ import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -78,25 +79,29 @@ fun VideoBlock(b: Block.Video, audio: AudioController) {
     var playing by remember(b.url) { mutableStateOf(false) }
     val where = if (HtmlParser.youtubeId(b.url) != null) "YouTube" else "the browser"
 
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(containerColor = cs.surfaceContainerHigh),
-    ) {
-        if (playing) {
+    if (playing && playable != Playable.None) {
+        // Deliberately no rounded clipping around the player: on many phones a clipped
+        // parent makes web video draw blank while the sound still plays.
+        Column(Modifier.fillMaxWidth().padding(vertical = 8.dp).background(cs.surfaceContainerHigh)) {
             when (val p = playable) {
                 is Playable.Web -> WebEmbed(p.url, Modifier.fillMaxWidth().aspectRatio(16f / 9f))
                 is Playable.File -> FilePlayer(p.url, Modifier.fillMaxWidth().aspectRatio(16f / 9f))
                 Playable.None -> {}
             }
-            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     "Not playing?", style = MaterialTheme.typography.bodySmall, color = cs.onSurfaceVariant,
                     modifier = Modifier.padding(start = 8.dp),
                 )
                 TextButton(onClick = { uri.openUri(b.url) }) { Text("Open in $where") }
             }
-        } else {
+        }
+    } else {
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
+            shape = MaterialTheme.shapes.large,
+            colors = CardDefaults.cardColors(containerColor = cs.surfaceContainerHigh),
+        ) {
             Box(
                 Modifier.clickable {
                     if (playable == Playable.None) {
@@ -136,12 +141,16 @@ private fun WebEmbed(embedUrl: String, modifier: Modifier) {
             settings.domStorageEnabled = true
             settings.mediaPlaybackRequiresUserGesture = false
             setBackgroundColor(android.graphics.Color.BLACK)
+            setLayerType(View.LAYER_TYPE_HARDWARE, null)
             webViewClient = WebViewClient()
             webChromeClient = object : WebChromeClient() {
                 override fun onShowCustomView(view: View, cb: CustomViewCallback) {
                     custom = view
                     callback = cb
                 }
+
+                override fun getDefaultVideoPoster(): android.graphics.Bitmap =
+                    android.graphics.Bitmap.createBitmap(1, 1, android.graphics.Bitmap.Config.ARGB_8888)
 
                 override fun onHideCustomView() {
                     custom = null

@@ -277,10 +277,10 @@ fun PostDetailScreen(vm: AppViewModel, id: Int, onBack: () -> Unit, onPost: (Int
         addAll(extras)
         addAll(body)
         if (post.isAudio && parsed.none { it is Block.Audio || it is Block.Video }) {
-            add(Block.Button("Open the website to listen", post.link))
+            add(Block.Button("Open the website to listen", "ext:" + post.link))
         }
         if (noVideoFound) {
-            add(Block.Button("Watch on the website", post.link))
+            add(Block.Button("Watch on the website", "ext:" + post.link))
             add(Block.Button("Open our YouTube channel", Site.YOUTUBE))
         }
     }
@@ -315,7 +315,7 @@ fun PostDetailScreen(vm: AppViewModel, id: Int, onBack: () -> Unit, onPost: (Int
                         }
                         ctx.safeStart(Intent.createChooser(send, null))
                     }) { Icon(Icons.Filled.Share, "Share") }
-                    IconButton(onClick = { uri.openUri(post.link) }) {
+                    IconButton(onClick = { openCustomTab(ctx, post.link) }) {
                         Icon(Icons.AutoMirrored.Filled.OpenInNew, "Open on website")
                     }
                 },
@@ -384,7 +384,7 @@ fun PageScreen(vm: AppViewModel, slug: String, title: String, onBack: () -> Unit
         value = PageState.Loading
         value = try { PageState.Ready(vm.loadPage(slug)) } catch (e: Exception) { PageState.Failed }
     }
-    val uri = LocalUriHandler.current
+    val ctx = LocalContext.current
     val linkColor = MaterialTheme.colorScheme.primary
 
     Scaffold(
@@ -394,7 +394,7 @@ fun PageScreen(vm: AppViewModel, slug: String, title: String, onBack: () -> Unit
                 title = { Text(title) },
                 navigationIcon = { BackButton(onBack) },
                 actions = {
-                    IconButton(onClick = { uri.openUri("https://rosebankgospelhall.ca/$slug/") }) {
+                    IconButton(onClick = { openCustomTab(ctx, "https://rosebankgospelhall.ca/$slug/") }) {
                         Icon(Icons.AutoMirrored.Filled.OpenInNew, "Open on website")
                     }
                 },
@@ -418,7 +418,7 @@ fun PageScreen(vm: AppViewModel, slug: String, title: String, onBack: () -> Unit
                     Box(Modifier.padding(pad).fillMaxSize(), contentAlignment = Alignment.Center) {
                         EmptyState(
                             Icons.AutoMirrored.Filled.OpenInNew, "Nothing to show here yet", "This page is easier to read on the website.",
-                            actionLabel = "Open the website", onAction = { uri.openUri("https://rosebankgospelhall.ca/$slug/") },
+                            actionLabel = "Open the website", onAction = { openCustomTab(ctx, "https://rosebankgospelhall.ca/$slug/") },
                         )
                     }
                 } else {

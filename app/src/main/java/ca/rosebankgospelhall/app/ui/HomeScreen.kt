@@ -297,7 +297,8 @@ private fun TileCard(t: Tile, modifier: Modifier, onClick: () -> Unit) {
 private fun InfoCard(icon: ImageVector, title: String, body: String, action: String, onClick: () -> Unit) {
     val cs = MaterialTheme.colorScheme
     Card(
-        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(containerColor = cs.surfaceContainerLow),
     ) {
@@ -308,7 +309,8 @@ private fun InfoCard(icon: ImageVector, title: String, body: String, action: Str
                 Text(title, style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(4.dp))
                 Text(body, style = MaterialTheme.typography.bodyMedium, color = cs.onSurfaceVariant)
-                TextButton(onClick = onClick, contentPadding = PaddingValues(0.dp)) { Text(action) }
+                Spacer(Modifier.height(8.dp))
+                Text(action, style = MaterialTheme.typography.labelLarge, color = cs.primary)
             }
         }
     }

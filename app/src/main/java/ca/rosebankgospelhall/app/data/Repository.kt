@@ -86,17 +86,23 @@ class Repository(private val ctx: Context) {
     private fun scrapePage(slug: String): PageData {
         val url = "${Site.BASE}/$slug/"
         val doc = Jsoup.parse(get(url), url)
-        doc.select(
-            "header,footer,nav,aside,script,style,noscript,form,svg,[role=navigation]," +
-                "[class*=navigation],[class*=menu],[class*=footer],[id*=footer],[class*=header],[id*=header]",
-        ).remove()
-        val content = doc.selectFirst(".wp-block-post-content")
+        val title = doc.title().substringBefore(" - ")
+        // Prefer the page's own content area; links and lists inside it are kept.
+        val specific = doc.selectFirst(".wp-block-post-content")
             ?: doc.selectFirst(".entry-content")
             ?: doc.selectFirst("[class*=post-content]")
             ?: doc.selectFirst("main")
-            ?: doc.selectFirst(".wp-site-blocks")
-            ?: doc.body()
-        return PageData(doc.title().substringBefore(" - "), content.html(), scraped = true)
+        val el = if (specific != null) {
+            specific.select("script,style,noscript,form,svg,[class*=footer],[id*=footer]").remove()
+            specific
+        } else {
+            doc.select(
+                "header,footer,nav,aside,script,style,noscript,form,svg,[role=navigation]," +
+                    "[class*=navigation],[class*=menu],[class*=footer],[id*=footer],[class*=header],[id*=header]",
+            ).remove()
+            doc.selectFirst(".wp-site-blocks") ?: doc.body()
+        }
+        return PageData(title, el.html(), scraped = true)
     }
 
     /** Reads the live post page and returns any videos on it (used when the API content has none). */

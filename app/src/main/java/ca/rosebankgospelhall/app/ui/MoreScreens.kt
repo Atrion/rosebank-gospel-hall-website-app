@@ -89,7 +89,7 @@ fun MoreScreen(onNav: (String) -> Unit) {
             InfoRow(Icons.Filled.Settings, "Settings", "Theme, text size, notifications") { onNav("settings") }
             Group("Elsewhere")
             InfoRow(Icons.Filled.VideoLibrary, "YouTube channel", "More videos and teaching") { uri.openUri(Site.YOUTUBE) }
-            InfoRow(Icons.Filled.Language, "Visit the website", "rosebankgospelhall.ca") { uri.openUri(Site.BASE) }
+            InfoRow(Icons.Filled.Language, "Visit the website", "rosebankgospelhall.ca") { uri.openUri("ext:" + Site.BASE) }
             Spacer(Modifier.height(24.dp))
         }
     }
@@ -122,7 +122,7 @@ fun ContactScreen(onBack: () -> Unit) {
                 ctx.safeStart(Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + Site.EMAIL)))
             }
             InfoRow(Icons.AutoMirrored.Filled.OpenInNew, "Send a message online", "Opens the contact form") {
-                uri.openUri(Site.BASE + "/contact-us/")
+                uri.openUri("ext:" + Site.BASE + "/contact-us/")
             }
             HorizontalDivider(Modifier.padding(horizontal = 20.dp))
             InfoRow(Icons.Filled.VideoLibrary, "YouTube channel") { uri.openUri(Site.YOUTUBE) }

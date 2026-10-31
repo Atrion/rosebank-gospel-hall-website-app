@@ -2,6 +2,13 @@
 
 Versions are numbered 0.01, 0.02, 0.03 and so on, increasing by 0.01 with each release.
 
+## 0.02
+
+- Whole Free Food Hamper and What We Believe cards on Home are now tappable
+- Fixed the Resources page showing nothing
+- Fixed web videos playing sound without picture
+- "Open on website" and similar buttons now open the website instead of staying in the app
+
 ## 0.01
 
 First release.
