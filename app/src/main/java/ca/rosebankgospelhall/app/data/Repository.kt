@@ -50,22 +50,53 @@ class Repository(private val ctx: Context) {
         (0 until arr.length()).map { postFromJson(arr.getJSONObject(it)) }
     }.getOrDefault(emptyList())
 
+    private fun textLength(html: String) = Jsoup.parse(html).text().length
+
+    /**
+     * Loads a site page. Tries the WordPress API first; if that returns little or nothing
+     * (page builders often do), reads the live page and keeps only its main content.
+     * The last good copy is kept on the phone for offline use.
+     */
     suspend fun fetchPage(slug: String): PageData = withContext(Dispatchers.IO) {
-        try {
+        val saved = File(ctx.filesDir, "page_$slug.json")
+        val rest = runCatching {
             val arr = JSONArray(get("${Site.BASE}/wp-json/wp/v2/pages?slug=$slug&_fields=title,content,link"))
-            if (arr.length() == 0) throw IOException("Page not found")
             val o = arr.getJSONObject(0)
             PageData(
                 Jsoup.parse(o.getJSONObject("title").getString("rendered")).text(),
                 o.getJSONObject("content").getString("rendered"),
             )
-        } catch (e: Exception) {
-            val url = "${Site.BASE}/$slug/"
-            val doc = Jsoup.parse(get(url), url)
-            doc.select("header,footer,nav,script,style,form").remove()
-            val main = doc.selectFirst("main") ?: doc.body()
-            PageData(doc.title().substringBefore(" - "), main.html())
+        }.getOrNull()
+        var result = rest?.takeIf { textLength(it.html) >= 60 }
+        if (result == null) {
+            result = runCatching { scrapePage(slug) }.getOrNull()?.takeIf { textLength(it.html) >= 20 }
         }
+        if (result == null) result = rest?.takeIf { textLength(it.html) >= 20 }
+        val good = result
+        if (good != null) {
+            runCatching { saved.writeText(JSONObject().put("t", good.title).put("h", good.html).toString()) }
+            return@withContext good
+        }
+        runCatching {
+            val o = JSONObject(saved.readText())
+            PageData(o.getString("t"), o.getString("h"))
+        }.getOrElse { throw IOException("Page unavailable") }
+    }
+
+    private fun scrapePage(slug: String): PageData {
+        val url = "${Site.BASE}/$slug/"
+        val doc = Jsoup.parse(get(url), url)
+        doc.select("header,footer,nav,aside,script,style,noscript,form,svg,[role=navigation],[class*=navigation],[class*=menu]").remove()
+        val main = doc.selectFirst("main") ?: doc.selectFirst(".wp-site-blocks") ?: doc.body()
+        return PageData(doc.title().substringBefore(" - "), main.html())
+    }
+
+    /** Reads the live post page and returns any videos on it (used when the API content has none). */
+    suspend fun liveMedia(url: String): List<Block.Video> = withContext(Dispatchers.IO) {
+        val doc = Jsoup.parse(get(url), url)
+        doc.select("header,footer,nav,aside").remove()
+        val main = doc.selectFirst("main") ?: doc.body()
+        MediaScan.scan(main.outerHtml()).take(3)
     }
 
     // ---- WordPress REST ----
@@ -105,7 +136,10 @@ class Repository(private val ctx: Context) {
         }
         val content = o.optJSONObject("content")?.optString("rendered").orEmpty()
         val featured = emb?.optJSONArray("wp:featuredmedia")?.optJSONObject(0)?.optString("source_url").orEmpty()
-        val image = featured.ifBlank { Jsoup.parse(content).selectFirst("img")?.attr("src").orEmpty() }.ifBlank { null }
+        val image = featured
+            .ifBlank { Jsoup.parse(content).selectFirst("img")?.attr("src").orEmpty() }
+            .ifBlank { MediaScan.thumbFor(content).orEmpty() }
+            .ifBlank { null }
         val author = emb?.optJSONArray("author")?.optJSONObject(0)?.optString("name")?.ifBlank { null }
         val excerpt = Jsoup.parse(o.optJSONObject("excerpt")?.optString("rendered").orEmpty()).text()
             .replace(Regex("\\s*\\[…\\]\\s*$"), "…")
@@ -151,7 +185,7 @@ class Repository(private val ctx: Context) {
                     contentHtml = content,
                     link = link,
                     dateMillis = millis,
-                    imageUrl = Jsoup.parse(content).selectFirst("img")?.attr("src")?.ifBlank { null },
+                    imageUrl = Jsoup.parse(content).selectFirst("img")?.attr("src")?.ifBlank { null } ?: MediaScan.thumbFor(content),
                     author = item.selectFirst("dc|creator")?.text()?.ifBlank { null },
                     terms = item.select("category").map {
                         Term(0, it.text(), it.text().lowercase().replace(' ', '-'), "category")

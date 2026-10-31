@@ -15,6 +15,7 @@ object Site {
     const val PHONE2 = "+1 902 859 2485"
     const val EMAIL = "bwthib@gmail.com"
     const val YOUTUBE = "https://www.youtube.com/@brodyt983/"
+    const val LOGO = "https://i0.wp.com/rosebankgospelhall.ca/wp-content/uploads/2026/04/Rosebank_logo_trans-1.png?fit=270%2C270&ssl=1"
     const val VERSE_REF = "1 Corinthians 15:3-4"
     const val VERSE = "For I delivered unto you first of all that which I also received, how that Christ died for our sins according to the scriptures; and that he was buried, and that he rose again the third day according to the scriptures."
 }

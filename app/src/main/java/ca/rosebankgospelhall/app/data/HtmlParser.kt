@@ -22,11 +22,24 @@ object HtmlParser {
 
     fun youtubeId(url: String): String? = ytRegex.find(url)?.groupValues?.get(1)
 
-    fun parse(html: String, baseUrl: String, linkColor: Color): List<Block> {
+    fun parse(html: String, baseUrl: String, linkColor: Color, dedupe: Boolean = false): List<Block> {
         val body = Jsoup.parseBodyFragment(html, baseUrl).body()
         val out = mutableListOf<Block>()
         flow(body, out, linkColor)
-        return out
+        if (!dedupe) return out
+        // Some page builders repeat sections for mobile and desktop; show each once.
+        val seen = HashSet<String>()
+        return out.filter { b ->
+            val key = when (b) {
+                is Block.Para -> "p:" + b.text.text
+                is Block.Heading -> "h:" + b.text.text
+                is Block.Bullet -> "b:" + b.text.text
+                is Block.Button -> "x:" + b.label + b.url
+                is Block.Image -> "i:" + b.url
+                else -> null
+            }
+            key == null || seen.add(key)
+        }
     }
 
     private fun trim(b: AnnotatedString.Builder): AnnotatedString = trim(b.toAnnotatedString())
@@ -83,6 +96,7 @@ object HtmlParser {
                             val href = n.absUrl("href").ifBlank { n.attr("href") }
                             when {
                                 n.selectFirst("img,audio,iframe,video") != null -> { flush(); flow(n, out, lc) }
+                                youtubeId(href) != null && n.text().length < 80 -> { flush(); out += videoBlock(youtubeId(href)!!) }
                                 audioExt.containsMatchIn(href) -> { flush(); out += Block.Audio(href, n.text().ifBlank { null }) }
                                 n.className().contains("button") -> { flush(); out += Block.Button(n.text().ifBlank { "Open" }, href) }
                                 else -> appendInline(n, sb, lc)
@@ -145,10 +159,12 @@ object HtmlParser {
     }
 
     private fun iframe(n: Element): Block? {
-        val src = absolute(n.attr("src").ifBlank { n.attr("data-src") })
+        val src = absolute(
+            n.attr("src").ifBlank { n.attr("data-src") }.ifBlank { n.attr("data-lazy-src") }.ifBlank { n.attr("data-litespeed-src") },
+        )
         if (src.isBlank()) return null
-        youtubeId(src)?.let { return videoBlock(it) }
-        return Block.Button(if (src.contains("vimeo")) "Open video" else "Open embedded content", src)
+        MediaScan.scan(src).firstOrNull()?.let { return it }
+        return Block.Button("Open embedded content", src)
     }
 
     private fun appendChildren(el: Element, b: AnnotatedString.Builder, lc: Color) {

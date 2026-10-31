@@ -62,6 +62,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     suspend fun loadPage(slug: String): PageData =
         pages[slug] ?: repo.fetchPage(slug).also { pages[slug] = it }
 
+    suspend fun liveMedia(url: String) = repo.liveMedia(url)
+
     fun toggleBookmark(id: Int) {
         val next = if (id in bookmarks.value) bookmarks.value - id else bookmarks.value + id
         prefs.bookmarks = next

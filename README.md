@@ -15,6 +15,10 @@ Native Android app (Kotlin, Jetpack Compose, Material 3) for rosebankgospelhall.
 2. Open the Actions tab and run "Build APK".
 3. Download `rosebank-gospel-hall-apk` from the finished run.
 
+**App icon:** `tools/make_icon.sh` downloads the website favicon and builds the launcher icon from it.
+The GitHub workflow runs it automatically. In Android Studio run `bash tools/make_icon.sh` once
+(needs curl and ImageMagick). Add `BG="#7A2E3E"` before the command to change the icon background (default white).
+
 **Option C – Command line** (JDK 17 + Android SDK + Gradle 8.7): `gradle assembleDebug`
 
 ## Where content comes from

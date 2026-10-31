@@ -56,6 +56,8 @@ import androidx.compose.ui.unit.dp
 import ca.rosebankgospelhall.app.AppViewModel
 import ca.rosebankgospelhall.app.data.Block
 import ca.rosebankgospelhall.app.data.HtmlParser
+import ca.rosebankgospelhall.app.data.MediaScan
+import ca.rosebankgospelhall.app.data.Site
 import ca.rosebankgospelhall.app.data.PageData
 import org.jsoup.Jsoup
 
@@ -212,11 +214,33 @@ fun PostDetailScreen(vm: AppViewModel, id: Int, onBack: () -> Unit, onPost: (Int
     }
 
     val linkColor = cs.primary
-    val blocks = remember(post.id, linkColor) {
-        val parsed = HtmlParser.parse(post.contentHtml, post.link, linkColor)
+    val parsed = remember(post.id, linkColor) { HtmlParser.parse(post.contentHtml, post.link, linkColor) }
+    val scanned = remember(post.id) { MediaScan.scan(post.contentHtml) }
+    var live by remember(post.id) { mutableStateOf<List<Block.Video>?>(null) }
+    val inParsed = parsed.filterIsInstance<Block.Video>()
+    LaunchedEffect(post.id) {
+        // Video posts whose content has no video: read the live page for it.
+        if (post.isVideo && inParsed.isEmpty() && scanned.isEmpty()) {
+            live = runCatching { vm.liveMedia(post.link) }.getOrDefault(emptyList())
+        }
+    }
+    val videos = (inParsed + scanned + (live ?: emptyList())).distinctBy { MediaScan.key(it.url) }
+    val hero = videos.firstOrNull()
+    val parsedKeys = inParsed.map { MediaScan.key(it.url) }.toSet()
+    val extras = videos.drop(1).filter { MediaScan.key(it.url) !in parsedKeys }
+    val body = parsed.filterNot { it is Block.Video && hero != null && MediaScan.key(it.url) == MediaScan.key(hero.url) }
+    val waitingLive = post.isVideo && videos.isEmpty() && live == null
+    val noVideoFound = post.isVideo && videos.isEmpty() && live != null
+    val blocks = buildList<Block> {
+        addAll(extras)
+        addAll(body)
         if (post.isAudio && parsed.none { it is Block.Audio || it is Block.Video }) {
-            parsed + Block.Button("Open the website to listen", post.link)
-        } else parsed
+            add(Block.Button("Open the website to listen", post.link))
+        }
+        if (noVideoFound) {
+            add(Block.Button("Watch on the website", post.link))
+            add(Block.Button("Open our YouTube channel", Site.YOUTUBE))
+        }
     }
     val minutes = remember(post.id) {
         (Jsoup.parse(post.contentHtml).text().split(' ').size / 200).coerceAtLeast(1)
@@ -257,7 +281,9 @@ fun PostDetailScreen(vm: AppViewModel, id: Int, onBack: () -> Unit, onPost: (Int
         },
     ) { pad ->
         LazyColumn(Modifier.padding(pad), contentPadding = PaddingValues(bottom = 32.dp)) {
-            if (post.imageUrl != null) {
+            if (hero != null) {
+                contentBlocks(listOf(hero), vm.audio, post.title, post.imageUrl, post.id)
+            } else if (post.imageUrl != null) {
                 item { PostImage(post, Modifier.fillMaxWidth().aspectRatio(16f / 9f)) }
             }
             item {
@@ -289,6 +315,9 @@ fun PostDetailScreen(vm: AppViewModel, id: Int, onBack: () -> Unit, onPost: (Int
                         style = MaterialTheme.typography.labelLarge, color = cs.onSurfaceVariant,
                     )
                 }
+            }
+            if (waitingLive) {
+                item { Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() } }
             }
             contentBlocks(blocks, vm.audio, post.title, post.imageUrl, post.id)
             if (related.isNotEmpty()) {
@@ -340,10 +369,19 @@ fun PageScreen(vm: AppViewModel, slug: String, title: String, onBack: () -> Unit
             }
             is PageState.Ready -> {
                 val blocks = remember(s.page, linkColor) {
-                    HtmlParser.parse(s.page.html, "https://rosebankgospelhall.ca/$slug/", linkColor)
+                    HtmlParser.parse(s.page.html, "https://rosebankgospelhall.ca/$slug/", linkColor, dedupe = true)
                 }
-                LazyColumn(Modifier.padding(pad), contentPadding = PaddingValues(vertical = 12.dp)) {
-                    contentBlocks(blocks, vm.audio, title, null, null)
+                if (blocks.isEmpty()) {
+                    Box(Modifier.padding(pad).fillMaxSize(), contentAlignment = Alignment.Center) {
+                        EmptyState(
+                            Icons.AutoMirrored.Filled.OpenInNew, "Nothing to show here yet", "This page is easier to read on the website.",
+                            actionLabel = "Open the website", onAction = { uri.openUri("https://rosebankgospelhall.ca/$slug/") },
+                        )
+                    }
+                } else {
+                    LazyColumn(Modifier.padding(pad), contentPadding = PaddingValues(vertical = 12.dp)) {
+                        contentBlocks(blocks, vm.audio, title, null, null)
+                    }
                 }
             }
         }

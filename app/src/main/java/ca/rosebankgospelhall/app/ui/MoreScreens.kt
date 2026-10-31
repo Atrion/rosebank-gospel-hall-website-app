@@ -169,7 +169,7 @@ fun SettingsScreen(vm: AppViewModel, onBack: () -> Unit, enableNotify: () -> Uni
             )
             Group("About")
             Text(
-                "Posts and pages come from rosebankgospelhall.ca. Version 1.0.",
+                "Posts and pages come from rosebankgospelhall.ca. Version 1.1.",
                 style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
             )

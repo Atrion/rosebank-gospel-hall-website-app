@@ -68,6 +68,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ca.rosebankgospelhall.app.AppViewModel
 import ca.rosebankgospelhall.app.data.Site
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 
 private data class Tile(val title: String, val note: String, val icon: ImageVector, val route: String)
 
@@ -103,7 +105,18 @@ fun HomeScreen(
         contentWindowInsets = WindowInsets(0),
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Rosebank Gospel Hall", fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold) },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Surface(shape = CircleShape, color = Color.White, modifier = Modifier.size(32.dp)) {
+                            AsyncImage(
+                                model = Site.LOGO, contentDescription = null, contentScale = ContentScale.Fit,
+                                modifier = Modifier.padding(3.dp),
+                            )
+                        }
+                        Spacer(Modifier.width(10.dp))
+                        Text("Rosebank Gospel Hall", fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold)
+                    }
+                },
                 scrollBehavior = scroll,
             )
         },
