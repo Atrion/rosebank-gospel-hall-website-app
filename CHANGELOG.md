@@ -1,37 +1,35 @@
 # Changelog
 
-Versions are numbered 0.01, 0.02, 0.03 and so on, increasing by 0.01 with each release.
+Versions go up by 0.01 with each release (1.01, 1.02, 1.03 and so on).
+The notes for each GitHub release are taken from its section below, so every release needs an entry here.
 
-## 0.05
+## 1.01
 
-- Home now shows Saved posts in place of Resources (Resources stays in the More tab)
-- The welcome card stays on Home until it is closed
-- Security hardening: only web, mail and phone links open; video player limited to known video sites
+First public release.
 
-## 0.04
+### Features
+- Home with the latest posts, a welcome card for new installs, and quick links to Videos, Audio, Articles and tracts, Testimonies, International and Saved posts
+- Posts, Listen and Watch tabs with filters for every category and tag, search, and sorting (newest, oldest, A to Z, Z to A)
+- Background audio player with lock-screen controls, speed control and skip buttons
+- Full-screen in-app video player for YouTube and other videos
+- Saved posts, available offline
+- Information pages: What We Believe, Free Food Hamper and Resources, plus Contact with one-tap call, email and directions
+- Light, dark or system theme and adjustable reading text size
+- Optional notifications when a new post is published
+- App icon taken from the website's favicon
 
-- Added credit for From Gravel Hill Enterprises in More and Settings
+### Privacy and security
+- No accounts, ads, analytics or tracking
+- Only web, mail and phone links open, and the video player only visits known video sites
 
-## 0.03
+### License and credits
+- Released under the Apache License 2.0, with an Open-source licenses screen in Settings
+- Built and maintained by From Gravel Hill Enterprises
 
-- Videos now open in a full-screen player inside the app
-- The APK is published automatically as a GitHub release
+### Changes since the last test build (0.05)
+- The More tab now lists only Resources, Contact, Settings and links, since the other pages are linked from Home
+- Added the license, notice and Open-source licenses screen
 
-## 0.02
+## 0.01 to 0.05
 
-- Whole Free Food Hamper and What We Believe cards on Home are now tappable
-- Fixed the Resources page showing nothing
-- Fixed web videos playing sound without picture
-- "Open on website" and similar buttons now open the website instead of staying in the app
-
-## 0.01
-
-First release.
-
-- Home, Posts, Listen, Watch and More tabs
-- Filters for every category and tag, plus search and sorting
-- Background audio player and in-app video player
-- Saved posts, light and dark themes, adjustable text size
-- What We Believe, Resources, Free Food Hamper and Contact pages
-- Optional notifications for new posts
-- A welcome card shown on the first launch after install
+Test builds shared privately while the app was developed. All of their changes are included in 1.01.

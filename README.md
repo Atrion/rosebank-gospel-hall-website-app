@@ -54,6 +54,12 @@ Minimum Android version: 8.0 (API 26).
 
 Built and maintained by [From Gravel Hill Enterprises](https://fromgravelhill.ca/) for Rosebank Gospel Hall.
 
+## License
+
+The source code is released under the [Apache License 2.0](LICENSE); see also [NOTICE](NOTICE).
+The Rosebank Gospel Hall name, logo, sermons, articles and images are not covered by this license
+and remain the property of the assembly and their respective authors.
+
 ## Content
 
 All sermons, articles, images and text belong to Rosebank Gospel Hall and their respective authors.

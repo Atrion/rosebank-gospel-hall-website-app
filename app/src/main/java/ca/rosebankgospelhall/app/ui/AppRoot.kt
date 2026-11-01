@@ -212,7 +212,10 @@ fun AppRoot(vm: AppViewModel, startPostId: Int?, onStartConsumed: () -> Unit) {
                 composable("watch") { PostsScreen(vm, "Watch", "videos", "", openPost) }
                 composable("more") { MoreScreen(onNav = { navTo(it) }) }
                 composable("saved") { SavedScreen(vm, onBack = { nav.popBackStack() }, onPost = openPost) }
-                composable("settings") { SettingsScreen(vm, onBack = { nav.popBackStack() }, enableNotify = enableNotify) }
+                composable("settings") {
+                    SettingsScreen(vm, onBack = { nav.popBackStack() }, enableNotify = enableNotify, onNav = { navTo(it) })
+                }
+                composable("licenses") { LicensesScreen(onBack = { nav.popBackStack() }) }
                 composable("contact") { ContactScreen(onBack = { nav.popBackStack() }) }
                 composable(
                     "post/{id}",

@@ -14,6 +14,7 @@ object Site {
     const val PHONE1 = "+1 902 206 1453"
     const val PHONE2 = "+1 902 859 2485"
     const val EMAIL = "bwthib@gmail.com"
+    const val REPO_URL = "https://github.com/TestingGroundZero/RosebankApp"
     const val DEVELOPER = "From Gravel Hill Enterprises"
     const val DEVELOPER_URL = "https://fromgravelhill.ca/"
     const val YOUTUBE = "https://www.youtube.com/@brodyt983/"

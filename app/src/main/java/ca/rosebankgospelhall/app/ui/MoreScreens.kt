@@ -79,13 +79,10 @@ fun MoreScreen(onNav: (String) -> Unit) {
         topBar = { CenterAlignedTopAppBar(title = { Text("More", style = MaterialTheme.typography.titleLarge) }) },
     ) { pad ->
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState())) {
-            Group("About us")
-            InfoRow(Icons.Filled.Info, "What we believe", "Our statement of faith") { onNav("page/what-we-believe") }
+            Group("Information")
             InfoRow(Icons.AutoMirrored.Filled.LibraryBooks, "Resources", "Books, links and materials to share") { onNav("page/resources") }
-            InfoRow(Icons.Filled.VolunteerActivism, "Free food hamper", "Help for families in need") { onNav("page/free-food-hamper") }
             InfoRow(Icons.Filled.Email, "Contact us", "Call, email or find the hall") { onNav("contact") }
-            Group("Your app")
-            InfoRow(Icons.Filled.Bookmark, "Saved posts") { onNav("saved") }
+            Group("App")
             InfoRow(Icons.Filled.Settings, "Settings", "Theme, text size, notifications") { onNav("settings") }
             Group("Elsewhere")
             InfoRow(Icons.Filled.VideoLibrary, "YouTube channel", "More videos and teaching") { uri.openUri(Site.YOUTUBE) }
@@ -133,7 +130,7 @@ fun ContactScreen(onBack: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(vm: AppViewModel, onBack: () -> Unit, enableNotify: () -> Unit) {
+fun SettingsScreen(vm: AppViewModel, onBack: () -> Unit, enableNotify: () -> Unit, onNav: (String) -> Unit) {
     val mode by vm.themeMode.collectAsState()
     val scale by vm.textScale.collectAsState()
     val notify by vm.notify.collectAsState()
@@ -179,6 +176,46 @@ fun SettingsScreen(vm: AppViewModel, onBack: () -> Unit, enableNotify: () -> Uni
                 style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
             )
+            InfoRow(Icons.Filled.Info, "Open-source licenses", "This app and the libraries it uses") { onNav("licenses") }
+            Spacer(Modifier.height(24.dp))
+        }
+    }
+}
+
+private val libraries = listOf(
+    "AndroidX, Jetpack Compose, Material Components, Media3" to "Apache License 2.0",
+    "Kotlin and kotlinx.coroutines" to "Apache License 2.0",
+    "Coil" to "Apache License 2.0",
+    "OkHttp and Okio" to "Apache License 2.0",
+    "jsoup (Jonathan Hedley)" to "MIT License",
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LicensesScreen(onBack: () -> Unit) {
+    val uri = LocalUriHandler.current
+    Scaffold(
+        contentWindowInsets = WindowInsets(0),
+        topBar = { TopAppBar(title = { Text("Open-source licenses") }, navigationIcon = { BackButton(onBack) }) },
+    ) { pad ->
+        Column(Modifier.padding(pad).verticalScroll(rememberScrollState())) {
+            Group("This app")
+            Text(
+                "Rosebank Gospel Hall for Android is released under the Apache License 2.0. " +
+                    "Copyright 2026 ${Site.DEVELOPER}.",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
+            )
+            InfoRow(Icons.AutoMirrored.Filled.OpenInNew, "Read the full license", "Opens GitHub") {
+                uri.openUri("ext:" + Site.REPO_URL + "/blob/main/LICENSE")
+            }
+            Text(
+                "The Rosebank Gospel Hall name, logo, sermons, articles and images are not covered by this license.",
+                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
+            )
+            Group("Libraries used")
+            libraries.forEach { (name, license) -> InfoRow(Icons.Filled.Info, name, license) }
             Spacer(Modifier.height(24.dp))
         }
     }

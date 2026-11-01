@@ -46,8 +46,23 @@ jobs:
         run: |
           APK="RosebankGospelHall-$VERSION.apk"
           cp app/build/outputs/apk/release/app-release.apk "$APK"
-          awk -v v="## $VERSION" '$0 == v {f=1; next} /^## / {f=0} f' CHANGELOG.md > notes.md
-          [ -s notes.md ] || echo "Version $VERSION" > notes.md
+          awk -v v="## $VERSION" '$0 == v {f=1; next} /^## / {f=0} f' CHANGELOG.md > changes.md
+          if [ ! -s changes.md ]; then
+            echo "::warning title=Changelog::CHANGELOG.md has no entry for version $VERSION"
+            echo "Version $VERSION" > changes.md
+          fi
+          SUM=$(sha256sum "$APK" | cut -d ' ' -f 1)
+          {
+            cat changes.md
+            echo
+            echo "---"
+            echo
+            echo "**Install:** download \`$APK\` on your Android phone (Android 8.0 or newer), open it, and allow installs from your browser if asked."
+            echo
+            echo "**Updating:** installs over the previous version and keeps your saved posts."
+            echo
+            echo "**SHA-256:** \`$SUM\`"
+          } > notes.md
           if gh release view "v$VERSION" > /dev/null 2>&1; then
             gh release upload "v$VERSION" "$APK" --clobber
             gh release edit "v$VERSION" --notes-file notes.md --latest
