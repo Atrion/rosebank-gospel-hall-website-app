@@ -65,6 +65,8 @@ private val pageTitles = mapOf(
 )
 
 internal fun openCustomTab(ctx: Context, url: String) {
+    val scheme = Uri.parse(url).scheme?.lowercase()
+    if (scheme != "http" && scheme != "https") return
     try {
         CustomTabsIntent.Builder().setShowTitle(true).build().launchUrl(ctx, Uri.parse(url))
     } catch (_: Exception) {
@@ -108,7 +110,7 @@ fun AppRoot(vm: AppViewModel, startPostId: Int?, onStartConsumed: () -> Unit) {
         }
     }
 
-    // Links inside posts open in the app when they point at the church website.
+    // Links inside posts open in the app when they point at the Gospel Hall website.
     val handler = remember(posts, nav) {
         object : UriHandler {
             override fun openUri(uri: String) {
@@ -117,6 +119,9 @@ fun AppRoot(vm: AppViewModel, startPostId: Int?, onStartConsumed: () -> Unit) {
                     return
                 }
                 val u = uri.trim()
+                // Only web, mail and phone links are ever opened.
+                val scheme = Uri.parse(u).scheme?.lowercase()
+                if (scheme != "http" && scheme != "https" && scheme != "mailto" && scheme != "tel") return
                 val bare = u.removePrefix("https://").removePrefix("http://").removePrefix("www.").trimEnd('/')
                 val host = "rosebankgospelhall.ca"
                 when {

@@ -27,11 +27,10 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     val textScale = MutableStateFlow(prefs.textScale)
     val notify = MutableStateFlow(prefs.notify)
     val promptDismissed = MutableStateFlow(prefs.promptDismissed)
-    // Shown on the first launch after install only; marked as seen straight away.
-    val showWelcome = MutableStateFlow(!prefs.welcomeSeen)
+    // Stays on the Home screen until the user closes it.
+    val showWelcome = MutableStateFlow(!prefs.welcomeDismissed)
 
     init {
-        prefs.welcomeSeen = true
         if (prefs.notify) NewPostWorker.schedule(app)
         viewModelScope.launch {
             val cached = withContext(Dispatchers.IO) { repo.cached() }
@@ -75,7 +74,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setTheme(mode: Int) { prefs.themeMode = mode; themeMode.value = mode }
     fun setTextScale(v: Float) { prefs.textScale = v; textScale.value = v }
-    fun dismissWelcome() { showWelcome.value = false }
+    fun dismissWelcome() { prefs.welcomeDismissed = true; showWelcome.value = false }
     fun dismissPrompt() { prefs.promptDismissed = true; promptDismissed.value = true }
 
     fun setNotify(on: Boolean) {

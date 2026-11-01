@@ -2,6 +2,12 @@
 
 Versions are numbered 0.01, 0.02, 0.03 and so on, increasing by 0.01 with each release.
 
+## 0.05
+
+- Home now shows Saved posts in place of Resources (Resources stays in the More tab)
+- The welcome card stays on Home until it is closed
+- Security hardening: only web, mail and phone links open; video player limited to known video sites
+
 ## 0.04
 
 - Added credit for From Gravel Hill Enterprises in More and Settings

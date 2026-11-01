@@ -1,7 +1,7 @@
 # Rosebank Gospel Hall for Android
 
-A native Android app for [Rosebank Gospel Hall](https://rosebankgospelhall.ca/) in Rosebank, Prince Edward Island.
-It brings the church website's messages, videos, audio and key pages into a fast, easy-to-read app.
+A native Android app for [Rosebank Gospel Hall](https://rosebankgospelhall.ca/), a Gospel Hall Assembly in Rosebank, Prince Edward Island.
+It brings the assembly website's messages, videos, audio and key pages into a fast, easy-to-read app.
 
 ## Install
 
@@ -57,4 +57,4 @@ Built and maintained by [From Gravel Hill Enterprises](https://fromgravelhill.ca
 ## Content
 
 All sermons, articles, images and text belong to Rosebank Gospel Hall and their respective authors.
-For questions about the church or its content, visit [rosebankgospelhall.ca](https://rosebankgospelhall.ca/).
+For questions about the assembly or its content, visit [rosebankgospelhall.ca](https://rosebankgospelhall.ca/).

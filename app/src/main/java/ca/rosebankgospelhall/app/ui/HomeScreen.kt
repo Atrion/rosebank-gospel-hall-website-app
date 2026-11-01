@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.Info
@@ -80,7 +81,7 @@ private val tiles = listOf(
     Tile("Articles and tracts", "Read the gospel", Icons.AutoMirrored.Filled.Article, "posts?filter=articles"),
     Tile("Testimonies", "Changed lives", Icons.Filled.Groups, "posts?filter=testimony"),
     Tile("International", "Gospel worldwide", Icons.Filled.Public, "posts?filter=international"),
-    Tile("Resources", "Books and links", Icons.AutoMirrored.Filled.LibraryBooks, "page/resources"),
+    Tile("Saved posts", "Read it later", Icons.Filled.Bookmark, "saved"),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

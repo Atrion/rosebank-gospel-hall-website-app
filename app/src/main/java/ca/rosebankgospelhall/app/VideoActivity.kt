@@ -12,6 +12,8 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.WindowManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
@@ -52,6 +54,10 @@ class VideoActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         url = intent.getStringExtra(EXTRA_URL).orEmpty()
+        if (!url.startsWith("https://")) {
+            finish()
+            return
+        }
         val youtube = HtmlParser.youtubeId(url)
         val vimeo = Regex("""vimeo\.com/(?:video/)?(\d+)""").find(url)?.groupValues?.get(1)
         val isFile = Regex("""\.(mp4|webm)(\?.*)?$""", RegexOption.IGNORE_CASE).containsMatchIn(url)
@@ -98,9 +104,10 @@ class VideoActivity : ComponentActivity() {
         setOnClickListener { onClick() }
     }
 
-    private fun openExternal() {
+    private fun openExternal(target: String = url) {
+        if (!target.startsWith("https://")) return
         try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(target)))
         } catch (_: Exception) {
         }
     }
@@ -111,8 +118,20 @@ class VideoActivity : ComponentActivity() {
         w.settings.javaScriptEnabled = true
         w.settings.domStorageEnabled = true
         w.settings.mediaPlaybackRequiresUserGesture = false
+        w.settings.allowFileAccess = false
+        w.settings.allowContentAccess = false
+        w.settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
         w.setBackgroundColor(Color.BLACK)
-        w.webViewClient = WebViewClient()
+        // The player may only navigate within known video hosts; anything else opens outside the app.
+        w.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+                val host = request.url.host.orEmpty().lowercase()
+                val allowed = request.url.scheme == "https" &&
+                    ALLOWED_HOSTS.any { host == it || host.endsWith(".$it") }
+                if (!allowed && request.hasGesture()) openExternal(request.url.toString())
+                return !allowed
+            }
+        }
         w.webChromeClient = object : WebChromeClient() {
             override fun onShowCustomView(view: View, callback: CustomViewCallback) {
                 if (customView != null) {
@@ -144,7 +163,12 @@ class VideoActivity : ComponentActivity() {
         // If the embedded player refuses (embedding disabled, error 153, no connection),
         // fall back to YouTube's own mobile page, which plays any public video.
         w.addJavascriptInterface(
-            VideoBridge { runOnUiThread { w.loadUrl("https://m.youtube.com/watch?v=$id") } },
+            VideoBridge {
+                runOnUiThread {
+                    w.removeJavascriptInterface("Android")
+                    w.loadUrl("https://m.youtube.com/watch?v=$id")
+                }
+            },
             "Android",
         )
         val html = """
@@ -219,5 +243,9 @@ class VideoActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_URL = "url"
+        private val ALLOWED_HOSTS = listOf(
+            "youtube.com", "youtu.be", "youtube-nocookie.com", "google.com", "gstatic.com",
+            "googlevideo.com", "ytimg.com", "vimeo.com", "vimeocdn.com", "rumble.com",
+        )
     }
 }

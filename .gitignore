@@ -6,3 +6,12 @@ build/
 captures/
 .externalNativeBuild/
 .cxx/
+
+# Signing keys and secrets: never commit these
+*.jks
+*.keystore
+keystore.properties
+*.apk
+*.aab
+.kotlin/
+.DS_Store
