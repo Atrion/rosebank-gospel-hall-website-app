@@ -3,6 +3,12 @@
 Versions go up by 0.01 with each release (1.01, 1.02, 1.03 and so on).
 The notes for each GitHub release are taken from its section below, so every release needs an entry here.
 
+## 1.02
+
+- Home: removed the Videos and Audio cards, since they have their own tabs
+- The notification prompt now stays on Home until you choose Turn on or Turn off
+- The Visit us card is centered
+
 ## 1.01
 
 First public release.

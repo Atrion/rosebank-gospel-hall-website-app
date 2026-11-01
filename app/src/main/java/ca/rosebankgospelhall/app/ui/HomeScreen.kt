@@ -64,6 +64,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -76,8 +77,6 @@ import coil.compose.AsyncImage
 private data class Tile(val title: String, val note: String, val icon: ImageVector, val route: String)
 
 private val tiles = listOf(
-    Tile("Videos", "Watch teaching", Icons.Filled.VideoLibrary, "watch"),
-    Tile("Audio", "Listen on the go", Icons.Filled.Headphones, "listen"),
     Tile("Articles and tracts", "Read the gospel", Icons.AutoMirrored.Filled.Article, "posts?filter=articles"),
     Tile("Testimonies", "Changed lives", Icons.Filled.Groups, "posts?filter=testimony"),
     Tile("International", "Gospel worldwide", Icons.Filled.Public, "posts?filter=international"),
@@ -140,9 +139,13 @@ fun HomeScreen(
                                 Spacer(Modifier.width(14.dp))
                                 Column(Modifier.weight(1f)) {
                                     Text("Hear when something new is posted", style = MaterialTheme.typography.titleSmall, color = cs.onTertiaryContainer)
+                                    Text(
+                                        "You can change this any time in Settings.",
+                                        style = MaterialTheme.typography.bodySmall, color = cs.onTertiaryContainer,
+                                    )
                                     Row {
-                                        TextButton(onClick = onEnableNotify) { Text("Turn on") }
-                                        TextButton(onClick = { vm.dismissPrompt() }) { Text("Not now") }
+                                        TextButton(onClick = { vm.dismissPrompt(); onEnableNotify() }) { Text("Turn on") }
+                                        TextButton(onClick = { vm.setNotify(false); vm.dismissPrompt() }) { Text("Turn off") }
                                     }
                                 }
                             }
@@ -216,12 +219,15 @@ fun HomeScreen(
                         shape = MaterialTheme.shapes.large,
                         colors = CardDefaults.cardColors(containerColor = cs.surfaceContainerLow),
                     ) {
-                        Column(Modifier.padding(20.dp)) {
-                            Text("Visit us", style = MaterialTheme.typography.titleLarge)
+                        Column(Modifier.fillMaxWidth().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Visit us", style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
                             Spacer(Modifier.height(6.dp))
-                            Text(Site.ADDRESS, style = MaterialTheme.typography.bodyLarge)
+                            Text(Site.ADDRESS, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
                             Spacer(Modifier.height(14.dp))
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                            ) {
                                 FilledTonalButton(onClick = {
                                     ctx.safeStart(Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=" + Uri.encode(Site.ADDRESS))))
                                 }) {
