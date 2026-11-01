@@ -11,7 +11,7 @@ plugins {
 
 // Release number in hundredths: 1 = version 0.01, 2 = version 0.02, and so on.
 // Raise it by 1 for every new release; the version name and code follow automatically.
-val releaseNumber = 2
+val releaseNumber = 4
 
 // Launcher icon: built from the website's favicon every build.
 // Put your own square image at icon/logo.png to override the download.
@@ -124,12 +124,26 @@ android {
 
     sourceSets.getByName("main").res.srcDir(launcherIconDir)
 
+    // Releases are signed with your own key when KEYSTORE_FILE and the related variables are
+    // provided (the GitHub workflow does this from repository secrets); otherwise the debug key is used.
+    val releaseKeystore = System.getenv("KEYSTORE_FILE")?.let { File(it) }?.takeIf { it.exists() }
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = releaseKeystore
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            }
+        }
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
+    lint { checkReleaseBuilds = false }
     buildFeatures { compose = true }
     composeOptions { kotlinCompilerExtensionVersion = "1.5.14" }
     compileOptions {

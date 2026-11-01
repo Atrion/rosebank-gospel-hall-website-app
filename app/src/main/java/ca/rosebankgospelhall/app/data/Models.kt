@@ -14,6 +14,8 @@ object Site {
     const val PHONE1 = "+1 902 206 1453"
     const val PHONE2 = "+1 902 859 2485"
     const val EMAIL = "bwthib@gmail.com"
+    const val DEVELOPER = "From Gravel Hill Enterprises"
+    const val DEVELOPER_URL = "https://fromgravelhill.ca/"
     const val YOUTUBE = "https://www.youtube.com/@brodyt983/"
     const val LOGO = "https://i0.wp.com/rosebankgospelhall.ca/wp-content/uploads/2026/04/Rosebank_logo_trans-1.png?fit=270%2C270&ssl=1"
 }

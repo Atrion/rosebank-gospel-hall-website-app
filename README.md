@@ -3,13 +3,18 @@
 A native Android app for [Rosebank Gospel Hall](https://rosebankgospelhall.ca/) in Rosebank, Prince Edward Island.
 It brings the church website's messages, videos, audio and key pages into a fast, easy-to-read app.
 
+## Install
+
+Download the latest `.apk` from the [Releases](../../releases) page and open it on your Android phone.
+You may need to allow installs from your browser when prompted.
+
 ## Features
 
 - **Home** with the latest posts, quick links to each kind of content, and visit details
 - **Posts** with filters for every category and tag on the site, search, and sorting (newest, oldest, A to Z, Z to A)
 - **Listen** and **Watch** tabs with their own filters and sorting
 - **Audio player** that keeps playing in the background with lock-screen controls, speed control and skip buttons
-- **Video player** that plays videos inside the app, including full screen
+- **Video player** that plays YouTube and other videos inside the app, full screen
 - **Saved posts** for reading again later, available offline
 - **Info pages**: What We Believe, Resources, Free Food Hamper and Contact (call, email, directions)
 - **Reading comfort**: light, dark or system theme and adjustable text size
@@ -45,7 +50,11 @@ app/src/main/java/ca/rosebankgospelhall/app/
 Built with Kotlin, Jetpack Compose (Material 3), Navigation Compose, Media3, Coil, OkHttp, Jsoup and WorkManager.
 Minimum Android version: 8.0 (API 26).
 
-## Content and credit
+## Credits
+
+Built and maintained by [From Gravel Hill Enterprises](https://fromgravelhill.ca/) for Rosebank Gospel Hall.
+
+## Content
 
 All sermons, articles, images and text belong to Rosebank Gospel Hall and their respective authors.
 For questions about the church or its content, visit [rosebankgospelhall.ca](https://rosebankgospelhall.ca/).

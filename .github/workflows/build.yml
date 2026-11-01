@@ -1,10 +1,12 @@
-name: Build APK
+name: Build and release
 on:
   push:
     branches: [main]
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
-  build:
+  release:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
@@ -15,8 +17,37 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: 8.14.3
-      - run: gradle assembleDebug -PrequireIcon
-      - uses: actions/upload-artifact@v7
-        with:
-          name: rosebank-gospel-hall-apk
-          path: app/build/outputs/apk/debug/*.apk
+      - name: Read version
+        id: ver
+        run: |
+          N=$(grep -E '^val releaseNumber' app/build.gradle.kts | grep -oE '[0-9]+')
+          echo "name=$((N / 100)).$(printf '%02d' $((N % 100)))" >> "$GITHUB_OUTPUT"
+      - name: Prepare signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+            echo "KEYSTORE_FILE=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
+          fi
+      - name: Build APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: gradle assembleRelease -PrequireIcon
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.ver.outputs.name }}
+        run: |
+          APK="RosebankGospelHall-$VERSION.apk"
+          cp app/build/outputs/apk/release/app-release.apk "$APK"
+          awk -v v="## $VERSION" '$0 == v {f=1; next} /^## / {f=0} f' CHANGELOG.md > notes.md
+          [ -s notes.md ] || echo "Version $VERSION" > notes.md
+          if gh release view "v$VERSION" > /dev/null 2>&1; then
+            gh release upload "v$VERSION" "$APK" --clobber
+            gh release edit "v$VERSION" --notes-file notes.md --latest
+          else
+            gh release create "v$VERSION" "$APK" --title "Version $VERSION" --notes-file notes.md --target "$GITHUB_SHA" --latest
+          fi

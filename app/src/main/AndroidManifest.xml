@@ -28,6 +28,14 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".VideoActivity"
+            android:exported="false"
+            android:hardwareAccelerated="true"
+            android:screenOrientation="fullSensor"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
+            android:theme="@android:style/Theme.Black.NoTitleBar" />
+
         <service
             android:name=".PlaybackService"
             android:exported="true"

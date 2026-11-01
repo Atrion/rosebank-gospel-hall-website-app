@@ -90,6 +90,7 @@ fun MoreScreen(onNav: (String) -> Unit) {
             Group("Elsewhere")
             InfoRow(Icons.Filled.VideoLibrary, "YouTube channel", "More videos and teaching") { uri.openUri(Site.YOUTUBE) }
             InfoRow(Icons.Filled.Language, "Visit the website", "rosebankgospelhall.ca") { uri.openUri("ext:" + Site.BASE) }
+            InfoRow(Icons.Filled.Info, Site.DEVELOPER, "Builds and maintains this app") { uri.openUri("ext:" + Site.DEVELOPER_URL) }
             Spacer(Modifier.height(24.dp))
         }
     }
@@ -174,7 +175,7 @@ fun SettingsScreen(vm: AppViewModel, onBack: () -> Unit, enableNotify: () -> Uni
             )
             Group("About")
             Text(
-                "Posts and pages come from rosebankgospelhall.ca. Version $version.",
+                "Posts and pages come from rosebankgospelhall.ca. Built and maintained by ${Site.DEVELOPER}. Version $version.",
                 style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
             )
