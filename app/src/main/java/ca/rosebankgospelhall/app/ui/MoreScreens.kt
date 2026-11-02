@@ -201,7 +201,7 @@ fun LicensesScreen(onBack: () -> Unit) {
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState())) {
             Group("This app")
             Text(
-                "Rosebank Gospel Hall for Android is released under the Apache License 2.0. " +
+                "Rosebank Gospel Hall App is released under the Apache License 2.0. " +
                     "Copyright 2026 ${Site.DEVELOPER}.",
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),

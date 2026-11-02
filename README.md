@@ -1,4 +1,4 @@
-# Rosebank Gospel Hall for Android
+# Rosebank Gospel Hall App
 
 A native Android app for [Rosebank Gospel Hall](https://rosebankgospelhall.ca/), a Gospel Hall Assembly in Rosebank, Prince Edward Island.
 It brings the assembly website's messages, videos, audio and key pages into a fast, easy-to-read app.
