@@ -9,7 +9,9 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
@@ -32,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -97,6 +100,8 @@ fun AppRoot(vm: AppViewModel, startPostId: Int?, onStartConsumed: () -> Unit) {
     val route = entry?.destination?.route?.substringBefore("?")
     val showBar = route in tabRoutes
     val enableNotify = rememberNotifyEnabler(vm)
+    val notifyOn by vm.notify.collectAsState()
+    val promptDone by vm.promptDismissed.collectAsState()
 
     fun navTo(r: String) {
         if (r in tabRoutes) {
@@ -174,6 +179,7 @@ fun AppRoot(vm: AppViewModel, startPostId: Int?, onStartConsumed: () -> Unit) {
     val openPost: (Int) -> Unit = { nav.navigate("post/$it") }
 
     CompositionLocalProvider(LocalUriHandler provides handler) {
+      Box(Modifier.fillMaxSize()) {
         Scaffold(
             contentWindowInsets = WindowInsets(0),
             bottomBar = {
@@ -200,7 +206,7 @@ fun AppRoot(vm: AppViewModel, startPostId: Int?, onStartConsumed: () -> Unit) {
         ) { pad ->
             NavHost(nav, startDestination = "home", modifier = Modifier.padding(pad)) {
                 composable("home") {
-                    HomeScreen(vm, onPost = openPost, onNav = { navTo(it) }, onEnableNotify = enableNotify)
+                    HomeScreen(vm, onPost = openPost, onNav = { navTo(it) })
                 }
                 composable(
                     "posts?filter={filter}",
@@ -232,5 +238,13 @@ fun AppRoot(vm: AppViewModel, startPostId: Int?, onStartConsumed: () -> Unit) {
                 }
             }
         }
+        if (!notifyOn && !promptDone) {
+            NotificationPrompt(
+                onYes = { vm.dismissPrompt(); enableNotify() },
+                onNo = { vm.setNotify(false); vm.dismissPrompt() },
+                modifier = Modifier.align(Alignment.TopCenter),
+            )
+        }
+      }
     }
 }

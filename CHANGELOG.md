@@ -3,6 +3,11 @@
 Versions go up by 0.01 with each release (1.01, 1.02, 1.03 and so on).
 The notes for each GitHub release are taken from its section below, so every release needs an entry here.
 
+## 1.03
+
+- The notification question now appears as a banner at the top of the screen on every launch, over whichever screen is open, until you answer Yes or No
+- Updated the repository link in the licenses screen for the project's new home
+
 ## 1.02
 
 - Home: removed the Videos and Audio cards, since they have their own tabs

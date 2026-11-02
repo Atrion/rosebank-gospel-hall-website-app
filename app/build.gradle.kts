@@ -11,7 +11,7 @@ plugins {
 
 // Release number in hundredths: 1 = version 0.01, 2 = version 0.02, and so on.
 // Raise it by 1 for every new release; the version name and code follow automatically.
-val releaseNumber = 102
+val releaseNumber = 103
 
 // Launcher icon: built from the website's favicon every build.
 // Put your own square image at icon/logo.png to override the download.

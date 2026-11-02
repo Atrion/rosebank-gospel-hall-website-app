@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Forward30
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Replay10
@@ -361,5 +363,37 @@ private fun BlockView(b: Block, audio: AudioController, postTitle: String, art: 
             FilledTonalButton(onClick = { uri.openUri(b.url) }) { Text(b.label) }
         }
         Block.Divider -> HorizontalDivider(Modifier.padding(horizontal = 20.dp, vertical = 12.dp))
+    }
+}
+
+/** Question pinned to the top of the screen on every launch until the user answers Yes or No. */
+@Composable
+fun NotificationPrompt(onYes: () -> Unit, onNo: () -> Unit, modifier: Modifier = Modifier) {
+    val cs = MaterialTheme.colorScheme
+    Surface(
+        modifier = modifier.statusBarsPadding().padding(horizontal = 12.dp, vertical = 8.dp).fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        color = cs.tertiaryContainer,
+        contentColor = cs.onTertiaryContainer,
+        shadowElevation = 8.dp,
+    ) {
+        Column(Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Filled.NotificationsActive, null)
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text("Turn on notifications for new posts?", style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        "You can change this any time in Settings.",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            }
+            Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.End) {
+                TextButton(onClick = onNo) { Text("No") }
+                Spacer(Modifier.width(8.dp))
+                FilledTonalButton(onClick = onYes) { Text("Yes") }
+            }
+        }
     }
 }

@@ -89,14 +89,11 @@ fun HomeScreen(
     vm: AppViewModel,
     onPost: (Int) -> Unit,
     onNav: (String) -> Unit,
-    onEnableNotify: () -> Unit,
 ) {
     val posts by vm.posts.collectAsState()
     val loading by vm.loading.collectAsState()
     val error by vm.error.collectAsState()
     val saved by vm.bookmarks.collectAsState()
-    val notify by vm.notify.collectAsState()
-    val dismissed by vm.promptDismissed.collectAsState()
     val showWelcome by vm.showWelcome.collectAsState()
     val scroll = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val ctx = LocalContext.current
@@ -126,32 +123,6 @@ fun HomeScreen(
         PullToRefreshBox(isRefreshing = loading, onRefresh = { vm.refresh() }, modifier = Modifier.padding(pad)) {
             LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
                 if (showWelcome) item { WelcomeCard(onClose = { vm.dismissWelcome() }) }
-
-                if (!showWelcome && !notify && !dismissed) {
-                    item {
-                        Card(
-                            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                            shape = MaterialTheme.shapes.large,
-                            colors = CardDefaults.cardColors(containerColor = cs.tertiaryContainer),
-                        ) {
-                            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Filled.NotificationsActive, null, tint = cs.onTertiaryContainer)
-                                Spacer(Modifier.width(14.dp))
-                                Column(Modifier.weight(1f)) {
-                                    Text("Hear when something new is posted", style = MaterialTheme.typography.titleSmall, color = cs.onTertiaryContainer)
-                                    Text(
-                                        "You can change this any time in Settings.",
-                                        style = MaterialTheme.typography.bodySmall, color = cs.onTertiaryContainer,
-                                    )
-                                    Row {
-                                        TextButton(onClick = { vm.dismissPrompt(); onEnableNotify() }) { Text("Turn on") }
-                                        TextButton(onClick = { vm.setNotify(false); vm.dismissPrompt() }) { Text("Turn off") }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
 
                 error?.let { msg ->
                     item {
