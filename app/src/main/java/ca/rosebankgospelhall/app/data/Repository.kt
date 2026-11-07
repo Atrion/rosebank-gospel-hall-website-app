@@ -50,6 +50,46 @@ class Repository(private val ctx: Context) {
         (0 until arr.length()).map { postFromJson(arr.getJSONObject(it)) }
     }.getOrDefault(emptyList())
 
+    /** How long ago the saved post list was written (very large if there is none). */
+    fun cacheAgeMs(): Long =
+        if (cacheFile.exists()) System.currentTimeMillis() - cacheFile.lastModified() else Long.MAX_VALUE
+
+    /** Fetches only the newest post, as a very small request, for the new-post check. */
+    suspend fun latestPost(): Post? = withContext(Dispatchers.IO) {
+        try {
+            val arr = JSONArray(
+                get("${Site.BASE}/wp-json/wp/v2/posts?per_page=1&orderby=date&order=desc&_fields=id,date_gmt,title,excerpt,link"),
+            )
+            if (arr.length() == 0) return@withContext null
+            val o = arr.getJSONObject(0)
+            val millis = runCatching {
+                LocalDateTime.parse(o.optString("date_gmt")).toInstant(ZoneOffset.UTC).toEpochMilli()
+            }.getOrDefault(0L)
+            Post(
+                id = o.getInt("id"),
+                title = Jsoup.parse(o.getJSONObject("title").getString("rendered")).text(),
+                excerpt = Jsoup.parse(o.optJSONObject("excerpt")?.optString("rendered").orEmpty()).text(),
+                contentHtml = "", link = o.optString("link"), dateMillis = millis,
+                imageUrl = null, author = null, terms = emptyList(),
+            )
+        } catch (e: Exception) {
+            val item = Jsoup.parse(get("${Site.BASE}/feed/"), "", Parser.xmlParser()).select("item").firstOrNull()
+                ?: return@withContext null
+            val link = item.selectFirst("link")?.text().orEmpty()
+            Post(
+                id = link.hashCode() and 0x7fffffff,
+                title = Jsoup.parse(item.selectFirst("title")?.text().orEmpty()).text(),
+                excerpt = Jsoup.parse(item.selectFirst("description")?.text().orEmpty()).text(),
+                contentHtml = "", link = link,
+                dateMillis = runCatching {
+                    ZonedDateTime.parse(item.selectFirst("pubDate")?.text().orEmpty(), DateTimeFormatter.RFC_1123_DATE_TIME)
+                        .toInstant().toEpochMilli()
+                }.getOrDefault(0L),
+                imageUrl = null, author = null, terms = emptyList(),
+            )
+        }
+    }
+
     private fun textLength(html: String) = Jsoup.parse(html).text().length
 
     /**

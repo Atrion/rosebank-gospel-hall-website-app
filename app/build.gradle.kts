@@ -11,14 +11,16 @@ plugins {
 
 // Release number in hundredths: 1 = version 0.01, 2 = version 0.02, and so on.
 // Raise it by 1 for every new release; the version name and code follow automatically.
-val releaseNumber = 104
+val releaseNumber = 106
 
 // Launcher icon: built from the website's favicon every build.
 // Put your own square image at icon/logo.png to override the download.
 val launcherIconDir = layout.buildDirectory.dir("generated/launcher/res").get().asFile
+val playGraphicsDir = layout.buildDirectory.dir("play").get().asFile
 
 val generateLauncherIcon = tasks.register("generateLauncherIcon") {
     val out = launcherIconDir
+    val playOut = playGraphicsDir
     val localLogo = rootProject.file("icon/logo.png")
     outputs.dir(out)
     outputs.upToDateWhen { false }
@@ -107,17 +109,29 @@ val generateLauncherIcon = tasks.register("generateLauncherIcon") {
         colorFile.writeText(
             "<resources>\n    <color name=\"ic_launcher_logo_bg\">$background</color>\n</resources>\n",
         )
+
+        // 512 px square icon for the Google Play listing.
+        val store = BufferedImage(512, 512, BufferedImage.TYPE_INT_ARGB)
+        val sg = store.createGraphics()
+        sg.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC)
+        sg.color = Color.decode(background)
+        sg.fillRect(0, 0, 512, 512)
+        sg.drawImage(canvas, 0, 0, 512, 512, null)
+        sg.dispose()
+        val storeFile = File(playOut, "icon-512.png")
+        storeFile.parentFile.mkdirs()
+        ImageIO.write(store, "png", storeFile)
     }
 }
 
 android {
     namespace = "ca.rosebankgospelhall.app"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "ca.rosebankgospelhall.app"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 36
         versionCode = releaseNumber
         versionName = "${releaseNumber / 100}.${"%02d".format(releaseNumber % 100)}"
     }

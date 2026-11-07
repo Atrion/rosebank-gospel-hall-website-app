@@ -3,6 +3,20 @@
 Versions go up by 0.01 with each release (1.01, 1.02, 1.03 and so on).
 The notes for each GitHub release are taken from its section below, so every release needs an entry here.
 
+## 1.06
+
+- Updated for Android 16 (the app now targets API level 36), as Google Play requires
+- The video player screen now fits correctly around the status bar and navigation bar
+- Added a Privacy policy link in Settings
+- App bundle and store listing files are now prepared with each release
+
+## 1.05
+
+- Lower battery use: the check for new posts now downloads only the newest post and runs at most about twice a day, only when the battery is not low
+- The video player no longer keeps the screen on unless a video is actually playing, and it pauses when you leave the screen
+- The app no longer re-downloads every post each time it opens if it did so a few minutes ago
+- The audio progress bar updates only while the app is on screen
+
 ## 1.04
 
 - The project is now called Rosebank Gospel Hall App

@@ -35,7 +35,9 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             val cached = withContext(Dispatchers.IO) { repo.cached() }
             if (posts.value.isEmpty()) posts.value = cached
-            refresh()
+            // Skip the full download if the saved list is only a few minutes old (pull down to refresh any time).
+            val age = withContext(Dispatchers.IO) { repo.cacheAgeMs() }
+            if (cached.isEmpty() || age > 10 * 60 * 1000L) refresh()
         }
     }
 

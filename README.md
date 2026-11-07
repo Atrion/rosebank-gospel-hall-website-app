@@ -36,6 +36,7 @@ The app reads from the public website, so anything published there appears in th
 - The app only talks to rosebankgospelhall.ca and the video hosts used by posts (such as YouTube).
 - Saved posts and settings stay on the device.
 - Permissions: internet access, notifications (optional) and background audio playback.
+- Read the full [privacy policy](https://fromgravelhill.ca/rosebank-gospel-hall-app/privacy/).
 
 ## Project layout
 

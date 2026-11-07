@@ -242,6 +242,8 @@ fun PostDetailScreen(vm: AppViewModel, id: Int, onBack: () -> Unit, onPost: (Int
     val uri = LocalUriHandler.current
     val cs = MaterialTheme.colorScheme
     val post = posts.firstOrNull { it.id == id }
+    // Opened from a notification for a post newer than the saved list: load it.
+    LaunchedEffect(id) { if (post == null && !vm.loading.value) vm.refresh() }
 
     if (post == null) {
         Scaffold(

@@ -38,6 +38,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.core.content.ContextCompat
@@ -160,12 +163,18 @@ fun AppRoot(vm: AppViewModel, startPostId: Int?, onStartConsumed: () -> Unit) {
     }
 
     // Keeps the progress bar moving while audio plays.
+    // (Only while the app is visible; background playback needs no timer.)
+    val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(audio.isPlaying) {
-        while (audio.isPlaying) {
-            audio.tick()
-            delay(500)
-        }
         audio.tick()
+        if (audio.isPlaying) {
+            lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (true) {
+                    audio.tick()
+                    delay(1000)
+                }
+            }
+        }
     }
 
     // A tapped notification opens the post directly.

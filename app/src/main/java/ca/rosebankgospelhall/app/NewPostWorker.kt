@@ -29,7 +29,7 @@ class NewPostWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ct
         val prefs = Prefs(applicationContext)
         if (!prefs.notify) return Result.success()
         return try {
-            val newest = Repository(applicationContext).fetchPosts().maxByOrNull { it.dateMillis }
+            val newest = Repository(applicationContext).latestPost()
             if (newest != null) {
                 val last = prefs.lastSeenMillis
                 if (last > 0L && newest.dateMillis > last) notifyPost(newest)
@@ -37,7 +37,8 @@ class NewPostWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ct
             }
             Result.success()
         } catch (e: Exception) {
-            Result.retry()
+            // Try again at the next scheduled check instead of retrying in a tight loop.
+            Result.success()
         }
     }
 
@@ -73,10 +74,15 @@ class NewPostWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ct
         private const val WORK = "new_post_check"
 
         fun schedule(ctx: Context) {
-            val req = PeriodicWorkRequestBuilder<NewPostWorker>(6, TimeUnit.HOURS)
-                .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
+            val req = PeriodicWorkRequestBuilder<NewPostWorker>(12, TimeUnit.HOURS, 3, TimeUnit.HOURS)
+                .setConstraints(
+                    Constraints.Builder()
+                        .setRequiredNetworkType(NetworkType.CONNECTED)
+                        .setRequiresBatteryNotLow(true)
+                        .build(),
+                )
                 .build()
-            WorkManager.getInstance(ctx).enqueueUniquePeriodicWork(WORK, ExistingPeriodicWorkPolicy.KEEP, req)
+            WorkManager.getInstance(ctx).enqueueUniquePeriodicWork(WORK, ExistingPeriodicWorkPolicy.UPDATE, req)
         }
 
         fun cancel(ctx: Context) {

@@ -136,6 +136,7 @@ fun SettingsScreen(vm: AppViewModel, onBack: () -> Unit, enableNotify: () -> Uni
     val notify by vm.notify.collectAsState()
     val body = MaterialTheme.typography.bodyLarge
     val ctx = LocalContext.current
+    val uri = LocalUriHandler.current
     val version = remember {
         runCatching { ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionName }.getOrNull().orEmpty()
     }
@@ -176,6 +177,7 @@ fun SettingsScreen(vm: AppViewModel, onBack: () -> Unit, enableNotify: () -> Uni
                 style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
             )
+            InfoRow(Icons.Filled.Info, "Privacy policy", "How the app handles information") { uri.openUri("ext:" + Site.PRIVACY_URL) }
             InfoRow(Icons.Filled.Info, "Open-source licenses", "This app and the libraries it uses") { onNav("licenses") }
             Spacer(Modifier.height(24.dp))
         }

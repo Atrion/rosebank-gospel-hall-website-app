@@ -15,6 +15,7 @@ object Site {
     const val PHONE2 = "+1 902 859 2485"
     const val EMAIL = "bwthib@gmail.com"
     const val REPO_URL = "https://github.com/Atrion/rosebank-gospel-hall-website-app"
+    const val PRIVACY_URL = "https://fromgravelhill.ca/rosebank-gospel-hall-app/privacy/"
     const val DEVELOPER = "From Gravel Hill Enterprises"
     const val DEVELOPER_URL = "https://fromgravelhill.ca/"
     const val YOUTUBE = "https://www.youtube.com/@brodyt983/"

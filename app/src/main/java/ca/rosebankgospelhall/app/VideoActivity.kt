@@ -21,6 +21,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.addCallback
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -31,10 +32,15 @@ import ca.rosebankgospelhall.app.data.HtmlParser
 import ca.rosebankgospelhall.app.data.Site
 
 /** Lets the page's player tell the app when a video can't be played in an embedded player. */
-class VideoBridge(private val onFail: () -> Unit) {
+class VideoBridge(private val onFailure: () -> Unit, private val onPlayState: (Int) -> Unit) {
     @JavascriptInterface
     fun onError(code: Int) {
-        onFail()
+        onFailure()
+    }
+
+    @JavascriptInterface
+    fun onState(state: Int) {
+        onPlayState(state)
     }
 }
 
@@ -52,7 +58,6 @@ class VideoActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         url = intent.getStringExtra(EXTRA_URL).orEmpty()
         if (!url.startsWith("https://")) {
             finish()
@@ -82,7 +87,14 @@ class VideoActivity : ComponentActivity() {
         content = FrameLayout(this)
         column.addView(content, LinearLayout.LayoutParams(MATCH_PARENT, 0, 1f))
         root.addView(column, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(root)
+        // Keep the controls clear of the status bar, navigation bar and any camera cut-out.
+        ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            insets
+        }
 
         when {
             youtube != null -> startYouTube(youtube)
@@ -163,12 +175,16 @@ class VideoActivity : ComponentActivity() {
         // If the embedded player refuses (embedding disabled, error 153, no connection),
         // fall back to YouTube's own mobile page, which plays any public video.
         w.addJavascriptInterface(
-            VideoBridge {
-                runOnUiThread {
-                    w.removeJavascriptInterface("Android")
-                    w.loadUrl("https://m.youtube.com/watch?v=$id")
-                }
-            },
+            VideoBridge(
+                onFailure = {
+                    runOnUiThread {
+                        w.removeJavascriptInterface("Android")
+                        w.loadUrl("https://m.youtube.com/watch?v=$id")
+                    }
+                },
+                // The screen is kept awake only while the video is playing or buffering.
+                onPlayState = { state -> runOnUiThread { keepScreenOn(state == 1 || state == 3) } },
+            ),
             "Android",
         )
         val html = """
@@ -185,7 +201,8 @@ class VideoActivity : ComponentActivity() {
             function onYouTubeIframeAPIReady(){
               new YT.Player('p',{videoId:'VIDEO_ID',width:'100%',height:'100%',
                 playerVars:{autoplay:1,playsinline:1,rel:0,origin:'ORIGIN'},
-                events:{onReady:function(e){ready=true;e.target.playVideo();},
+                events:{onReady:function(e){ready=true;window.ytp=e.target;e.target.playVideo();},
+                        onStateChange:function(e){Android.onState(e.data);},
                         onError:function(e){Android.onError(e.data);}}});
             }
             setTimeout(function(){if(!ready){Android.onError(-1);}},9000);
@@ -207,6 +224,11 @@ class VideoActivity : ComponentActivity() {
         )
     }
 
+    private fun keepScreenOn(on: Boolean) {
+        if (on) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }
+
     private fun hideCustom() {
         customView?.let { root.removeView(it) }
         customView = null
@@ -225,6 +247,17 @@ class VideoActivity : ComponentActivity() {
         web?.onPause()
         exo?.pause()
         super.onPause()
+    }
+
+    override fun onStop() {
+        // Leaving the screen stops playback so sound and the web page don't keep running unseen.
+        web?.evaluateJavascript(
+            "if(window.ytp){ytp.pauseVideo();}document.querySelectorAll('video,audio').forEach(function(v){v.pause();});",
+            null,
+        )
+        exo?.pause()
+        keepScreenOn(false)
+        super.onStop()
     }
 
     override fun onResume() {
