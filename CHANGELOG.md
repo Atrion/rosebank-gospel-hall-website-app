@@ -3,6 +3,10 @@
 Versions go up by 0.01 with each release (1.01, 1.02, 1.03 and so on).
 The notes for each GitHub release are taken from its section below, so every release needs an entry here.
 
+## 1.07
+- Updated Play store listing and image
+- Removed aab production from public
+
 ## 1.06
 
 - Updated for Android 16 (the app now targets API level 36), as Google Play requires

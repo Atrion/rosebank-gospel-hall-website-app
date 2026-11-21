@@ -46,12 +46,10 @@ jobs:
         run: |
           APK="RosebankGospelHallApp-$VERSION.apk"
           cp app/build/outputs/apk/release/app-release.apk "$APK"
-          ASSETS=("$APK")
           AAB=""
           if [ -n "${KEYSTORE_FILE:-}" ]; then
             AAB="RosebankGospelHallApp-$VERSION.aab"
             cp app/build/outputs/bundle/release/app-release.aab "$AAB"
-            ASSETS+=("$AAB")
           fi
           awk -v v="## $VERSION" '$0 == v {f=1; next} /^## / {f=0} f' CHANGELOG.md > changes.md
           if [ ! -s changes.md ]; then
@@ -69,18 +67,22 @@ jobs:
             echo "**Updating:** installs over the previous version and keeps your saved posts."
             echo
             echo "**SHA-256:** \`$SUM\`"
-            if [ -n "$AAB" ]; then
-              echo
-              echo "**Google Play file:** \`$AAB\` is the app bundle for the Play Console. It cannot be installed directly."
-            fi
           } > notes.md
           if gh release view "v$VERSION" > /dev/null 2>&1; then
             echo "::notice title=Release::v$VERSION already exists and was left unchanged. Raise the release number to publish a new version."
           else
-            gh release create "v$VERSION" "${ASSETS[@]}" --title "Version $VERSION" --notes-file notes.md --target "$GITHUB_SHA" --latest
+            gh release create "v$VERSION" "$APK" --title "Version $VERSION" --notes-file notes.md --target "$GITHUB_SHA" --latest
+            if [ -n "$AAB" ]; then
+              # A draft release is visible only to people with write access to the repository.
+              gh release create "play-v$VERSION" "$AAB" --draft --title "Google Play bundle $VERSION (private)" --notes "Private file for the Play Console. Upload it there, then delete this draft. Never click Publish on it." --target "$GITHUB_SHA"
+              echo "::notice title=Google Play::The app bundle is in a private draft release named play-v$VERSION."
+            else
+              echo "::warning title=Google Play::No release key was found, so no app bundle was made."
+            fi
           fi
       - name: Keep the Play Store icon
         uses: actions/upload-artifact@v7
         with:
           name: play-store-icon
           path: app/build/play/icon-512.png
+          retention-days: 14

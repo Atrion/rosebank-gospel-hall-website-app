@@ -53,7 +53,7 @@ Messages and articles come from rosebankgospelhall.ca and belong to Rosebank Gos
 
 ## Release steps
 
-1. Download the `.aab` file from the latest GitHub release.
+1. Download the `.aab` file from the private draft release named `play-v` plus the version (Releases page; only you can see it). Delete the draft after uploading and never click Publish on it.
 2. Play Console, Testing, Internal testing, Create new release. On first upload, accept Play App Signing.
 3. Upload the `.aab`, add testers by email, and roll out.
 4. Test the Play version. Then use Closed testing and Production when ready.
