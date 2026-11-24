@@ -16,10 +16,17 @@ object Site {
     const val EMAIL = "bwthib@gmail.com"
     const val REPO_URL = "https://github.com/Atrion/rosebank-gospel-hall-website-app"
     const val PRIVACY_URL = "https://fromgravelhill.ca/rosebank-gospel-hall-app/privacy/"
+    const val LIVE_URL = "https://www.youtube.com/@brodyt983/live"
     const val DEVELOPER = "From Gravel Hill Enterprises"
     const val DEVELOPER_URL = "https://fromgravelhill.ca/"
     const val YOUTUBE = "https://www.youtube.com/@brodyt983/"
     const val LOGO = "https://i0.wp.com/rosebankgospelhall.ca/wp-content/uploads/2026/04/Rosebank_logo_trans-1.png?fit=270%2C270&ssl=1"
+}
+
+sealed interface LiveStatus {
+    data class Live(val videoId: String) : LiveStatus
+    data object Offline : LiveStatus
+    data object Unknown : LiveStatus
 }
 
 data class Term(val id: Int, val name: String, val slug: String, val taxonomy: String)

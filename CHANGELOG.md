@@ -4,8 +4,8 @@ Versions go up by 0.01 with each release (1.01, 1.02, 1.03 and so on).
 The notes for each GitHub release are taken from its section below, so every release needs an entry here.
 
 ## 1.07
-- Updated Play store listing and image
-- Removed aab production from public
+
+- New Live button at the top of More: plays the YouTube channel's live broadcast inside the app, or shows a clear message when there is no live broadcast
 
 ## 1.06
 

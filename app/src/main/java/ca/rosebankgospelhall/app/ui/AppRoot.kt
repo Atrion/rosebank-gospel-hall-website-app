@@ -231,6 +231,7 @@ fun AppRoot(vm: AppViewModel, startPostId: Int?, onStartConsumed: () -> Unit) {
                     SettingsScreen(vm, onBack = { nav.popBackStack() }, enableNotify = enableNotify, onNav = { navTo(it) })
                 }
                 composable("licenses") { LicensesScreen(onBack = { nav.popBackStack() }) }
+                composable("live") { LiveScreen(vm, onBack = { nav.popBackStack() }, onWatchRecent = { navTo("watch") }) }
                 composable("contact") { ContactScreen(onBack = { nav.popBackStack() }) }
                 composable(
                     "post/{id}",

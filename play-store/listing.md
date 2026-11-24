@@ -17,6 +17,7 @@ WHAT YOU CAN DO
 • Browse every post, with filters for each category and tag, search and sorting
 • Listen to audio messages, even with the screen off, with lock-screen controls, speed and skip buttons
 • Watch videos full screen inside the app
+• Watch our live broadcast when we are on air
 • Save posts to read again later, even without a connection
 • Read What We Believe, the Free Food Hamper page and Resources
 • Call, email or get directions to the hall

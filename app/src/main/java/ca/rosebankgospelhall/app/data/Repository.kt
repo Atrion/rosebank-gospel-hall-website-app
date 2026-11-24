@@ -50,6 +50,35 @@ class Repository(private val ctx: Context) {
         (0 until arr.length()).map { postFromJson(arr.getJSONObject(it)) }
     }.getOrDefault(emptyList())
 
+    /** Asks YouTube whether the channel is broadcasting live right now. One request, only when the user opens Live. */
+    suspend fun liveStatus(): LiveStatus = withContext(Dispatchers.IO) {
+        try {
+            val req = Request.Builder().url(Site.LIVE_URL)
+                .header("User-Agent", "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Mobile Safari/537.36")
+                .header("Accept-Language", "en-US,en;q=0.9")
+                .header("Cookie", "SOCS=CAI")
+                .build()
+            val html = client.newCall(req).execute().use { r ->
+                if (!r.isSuccessful) return@withContext LiveStatus.Unknown
+                r.body?.string().orEmpty()
+            }
+            val live = Regex("\"liveBroadcastDetails\"\\s*:\\s*\\{[^}]*\"isLiveNow\"\\s*:\\s*true").containsMatchIn(html)
+            if (live) {
+                val id = Regex("<link rel=\"canonical\" href=\"https://www\\.youtube\\.com/watch\\?v=([A-Za-z0-9_-]{11})\"")
+                    .find(html)?.groupValues?.get(1)
+                    ?: Regex("\"videoDetails\"\\s*:\\s*\\{\\s*\"videoId\"\\s*:\\s*\"([A-Za-z0-9_-]{11})\"")
+                        .find(html)?.groupValues?.get(1)
+                if (id != null) LiveStatus.Live(id) else LiveStatus.Unknown
+            } else if (html.contains("ytInitialData") || html.contains("ytInitialPlayerResponse")) {
+                LiveStatus.Offline
+            } else {
+                LiveStatus.Unknown
+            }
+        } catch (e: Exception) {
+            LiveStatus.Unknown
+        }
+    }
+
     /** How long ago the saved post list was written (very large if there is none). */
     fun cacheAgeMs(): Long =
         if (cacheFile.exists()) System.currentTimeMillis() - cacheFile.lastModified() else Long.MAX_VALUE

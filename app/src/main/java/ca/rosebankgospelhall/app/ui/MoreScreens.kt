@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Settings
@@ -79,6 +80,7 @@ fun MoreScreen(onNav: (String) -> Unit) {
         topBar = { CenterAlignedTopAppBar(title = { Text("More", style = MaterialTheme.typography.titleLarge) }) },
     ) { pad ->
         Column(Modifier.padding(pad).verticalScroll(rememberScrollState())) {
+            InfoRow(Icons.Filled.LiveTv, "Live", "Watch our live broadcast when we are on air") { onNav("live") }
             Group("Information")
             InfoRow(Icons.AutoMirrored.Filled.LibraryBooks, "Resources", "Books, links and materials to share") { onNav("page/resources") }
             InfoRow(Icons.Filled.Email, "Contact us", "Call, email or find the hall") { onNav("contact") }

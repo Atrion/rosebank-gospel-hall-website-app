@@ -15,6 +15,7 @@ You may need to allow installs from your browser when prompted.
 - **Listen** and **Watch** tabs with their own filters and sorting
 - **Audio player** that keeps playing in the background with lock-screen controls, speed control and skip buttons
 - **Video player** that plays YouTube and other videos inside the app, full screen
+- **Live** button in the More tab that plays the YouTube live broadcast in the app, or explains when there is none
 - **Saved posts** for reading again later, available offline
 - **Info pages**: What We Believe, Resources, Free Food Hamper and Contact (call, email, directions)
 - **Reading comfort**: light, dark or system theme and adjustable text size

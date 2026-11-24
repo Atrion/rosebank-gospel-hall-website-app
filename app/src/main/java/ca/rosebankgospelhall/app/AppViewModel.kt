@@ -68,6 +68,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     suspend fun liveMedia(url: String) = repo.liveMedia(url)
 
+    suspend fun liveStatus() = repo.liveStatus()
+
     fun toggleBookmark(id: Int) {
         val next = if (id in bookmarks.value) bookmarks.value - id else bookmarks.value + id
         prefs.bookmarks = next

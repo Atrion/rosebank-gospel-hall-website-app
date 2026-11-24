@@ -40,6 +40,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: gradle assembleRelease bundleRelease -PrequireIcon
       - name: Publish release
+        id: pub
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.ver.outputs.name }}
@@ -72,6 +73,7 @@ jobs:
             echo "::notice title=Release::v$VERSION already exists and was left unchanged. Raise the release number to publish a new version."
           else
             gh release create "v$VERSION" "$APK" --title "Version $VERSION" --notes-file notes.md --target "$GITHUB_SHA" --latest
+            echo "new=true" >> "$GITHUB_OUTPUT"
             if [ -n "$AAB" ]; then
               # A draft release is visible only to people with write access to the repository.
               gh release create "play-v$VERSION" "$AAB" --draft --title "Google Play bundle $VERSION (private)" --notes "Private file for the Play Console. Upload it there, then delete this draft. Never click Publish on it." --target "$GITHUB_SHA"
@@ -80,6 +82,42 @@ jobs:
               echo "::warning title=Google Play::No release key was found, so no app bundle was made."
             fi
           fi
+      - name: Check Google Play upload settings
+        id: play
+        env:
+          PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -n "$PLAY_JSON" ] && [ -n "${KEYSTORE_FILE:-}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice title=Google Play::Automatic upload is off (no PLAY_SERVICE_ACCOUNT_JSON secret or no release key)."
+          fi
+      - name: Prepare Google Play release notes
+        if: steps.pub.outputs.new == 'true' && steps.play.outputs.enabled == 'true'
+        run: |
+          mkdir -p whatsnew
+          python3 - <<'PY'
+          lines = open("changes.md").read().splitlines()
+          lines = [("• " + l[2:]) if l.startswith("- ") else l for l in lines if l.strip() and not l.startswith("#")]
+          out = ""
+          for l in lines:
+              if len(out) + len(l) + 1 > 480:
+                  break
+              out += l + "\n"
+          open("whatsnew/whatsnew-en-CA", "w").write(out.strip())
+          PY
+      - name: Upload to Google Play (internal testing)
+        if: steps.pub.outputs.new == 'true' && steps.play.outputs.enabled == 'true'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: ca.rosebankgospelhall.app
+          releaseFiles: app/build/outputs/bundle/release/app-release.aab
+          track: internal
+          # Use "draft" until the app is fully set up in Play Console, then change to "completed".
+          status: draft
+          releaseName: ${{ steps.ver.outputs.name }}
+          whatsNewDirectory: whatsnew
       - name: Keep the Play Store icon
         uses: actions/upload-artifact@v7
         with:
