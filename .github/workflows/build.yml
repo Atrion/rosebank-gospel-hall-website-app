@@ -20,8 +20,8 @@ jobs:
       - name: Read version
         id: ver
         run: |
-          N=$(grep -E '^val releaseNumber' app/build.gradle.kts | grep -oE '[0-9]+')
-          echo "name=$((N / 100)).$(printf '%02d' $((N % 100)))" >> "$GITHUB_OUTPUT"
+          VERSION=$(grep -E '^val appVersion = ' app/build.gradle.kts | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+          echo "name=$VERSION" >> "$GITHUB_OUTPUT"
       - name: Prepare signing key
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}

@@ -9,9 +9,10 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
-// Release number in hundredths: 1 = version 0.01, 2 = version 0.02, and so on.
-// Raise it by 1 for every new release; the version name and code follow automatically.
-val releaseNumber = 107
+// App version as major.minor.patch. Raise the patch number by 1 for every new release.
+// The version code that Google Play compares is derived from it (1.7.1 becomes 10701).
+val appVersion = "1.7.1"
+val appVersionCode = appVersion.split(".").map { it.toInt() }.let { it[0] * 10000 + it[1] * 100 + it[2] }
 
 // Launcher icon: built from the website's favicon every build.
 // Put your own square image at icon/logo.png to override the download.
@@ -132,8 +133,8 @@ android {
         applicationId = "ca.rosebankgospelhall.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = releaseNumber
-        versionName = "${releaseNumber / 100}.${"%02d".format(releaseNumber % 100)}"
+        versionCode = appVersionCode
+        versionName = appVersion
     }
 
     sourceSets.getByName("main").res.srcDir(launcherIconDir)
@@ -153,7 +154,12 @@ android {
     }
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // Shrinks and obfuscates the release build; Google Play receives the mapping file inside the bundle.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+            // Includes native symbol tables in the bundle for clearer crash reports.
+            ndk { debugSymbolLevel = "SYMBOL_TABLE" }
             signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }

@@ -4,6 +4,8 @@ Text and answers for the Play Console. Nothing here is used by the app itself.
 
 ## Store listing
 
+**Store page:** https://play.google.com/store/apps/details?id=ca.rosebankgospelhall.app
+
 **App name** (30 characters or fewer)
 Rosebank Gospel Hall App
 
@@ -59,4 +61,4 @@ Messages and articles come from rosebankgospelhall.ca and belong to Rosebank Gos
 3. Upload the `.aab`, add testers by email, and roll out.
 4. Test the Play version. Then use Closed testing and Production when ready.
 5. Personal developer accounts created recently must run a closed test with at least 12 testers for 14 days before applying for production. Organization accounts do not.
-6. Every upload needs a higher version number than the last. The release number in `app/build.gradle.kts` provides this.
+6. Every upload needs a higher version number than the last. The `appVersion` line in `app/build.gradle.kts` provides this (1.7.1 gives version code 10701).

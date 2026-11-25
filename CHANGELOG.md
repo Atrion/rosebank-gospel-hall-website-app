@@ -1,43 +1,50 @@
 # Changelog
 
-Versions go up by 0.01 with each release (1.01, 1.02, 1.03 and so on).
+Versions use the form major.minor.patch. The patch number goes up by one with each release (1.7.1, 1.7.2 and so on).
 The notes for each GitHub release are taken from its section below, so every release needs an entry here.
 
-## 1.07
+## 1.7.1
+
+- New Live button in More: watch our live broadcast in the app, or see a clear message when we are not live (added in 1.7.0)
+- Smaller, faster app: release builds are now optimized
+- Better crash reporting for future fixes
+- New version numbering: major.minor.patch
+
+## 1.7.0
 
 - New Live button at the top of More: plays the YouTube channel's live broadcast inside the app, or shows a clear message when there is no live broadcast
 
-## 1.06
+## 1.6.0
 
 - Updated for Android 16 (the app now targets API level 36), as Google Play requires
 - The video player screen now fits correctly around the status bar and navigation bar
 - Added a Privacy policy link in Settings
 - App bundle and store listing files are now prepared with each release
 
-## 1.05
+## 1.5.0
 
 - Lower battery use: the check for new posts now downloads only the newest post and runs at most about twice a day, only when the battery is not low
 - The video player no longer keeps the screen on unless a video is actually playing, and it pauses when you leave the screen
 - The app no longer re-downloads every post each time it opens if it did so a few minutes ago
 - The audio progress bar updates only while the app is on screen
 
-## 1.04
+## 1.4.0
 
 - The project is now called Rosebank Gospel Hall App
 - Behind-the-scenes maintenance and build improvements
 
-## 1.03
+## 1.3.0
 
 - The notification question now appears as a banner at the top of the screen on every launch, over whichever screen is open, until you answer Yes or No
 - Updated the repository link in the licenses screen for the project's new home
 
-## 1.02
+## 1.2.0
 
 - Home: removed the Videos and Audio cards, since they have their own tabs
 - The notification prompt now stays on Home until you choose Turn on or Turn off
 - The Visit us card is centered
 
-## 1.01
+## 1.1.0
 
 First public release.
 

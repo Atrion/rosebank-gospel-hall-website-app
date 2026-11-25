@@ -5,8 +5,11 @@ It brings the assembly website's messages, videos, audio and key pages into a fa
 
 ## Install
 
-Download the latest `.apk` from the [Releases](../../releases) page and open it on your Android phone.
-You may need to allow installs from your browser when prompted.
+**Google Play:** [Rosebank Gospel Hall App](https://play.google.com/store/apps/details?id=ca.rosebankgospelhall.app)
+
+**Direct download:** get the latest `.apk` from the [Releases](../../releases) page and open it on your Android phone.
+You may need to allow installs from your browser. The Google Play and direct-download versions are signed
+differently, so switching between them means uninstalling first.
 
 ## Features
 
