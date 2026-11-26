@@ -3,6 +3,12 @@
 Versions use the form major.minor.patch. The patch number goes up by one with each release (1.7.1, 1.7.2 and so on).
 The notes for each GitHub release are taken from its section below, so every release needs an entry here.
 
+## 1.7.2
+
+- Faster and leaner: further release optimization
+- Video screen display improved for Android 15 and 16
+- Smaller app: removed an unused library
+
 ## 1.7.1
 
 - New Live button in More: watch our live broadcast in the app, or see a clear message when we are not live (added in 1.7.0)

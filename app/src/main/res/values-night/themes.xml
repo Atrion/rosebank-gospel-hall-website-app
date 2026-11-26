@@ -1,0 +1,3 @@
+<resources>
+    <style name="Theme.Rosebank" parent="android:Theme.Material.NoActionBar" />
+</resources>

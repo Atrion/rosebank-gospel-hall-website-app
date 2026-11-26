@@ -11,7 +11,7 @@ plugins {
 
 // App version as major.minor.patch. Raise the patch number by 1 for every new release.
 // The version code that Google Play compares is derived from it (1.7.1 becomes 10701).
-val appVersion = "1.7.1"
+val appVersion = "1.7.2"
 val appVersionCode = appVersion.split(".").map { it.toInt() }.let { it[0] * 10000 + it[1] * 100 + it[2] }
 
 // Launcher icon: built from the website's favicon every build.
@@ -157,9 +157,9 @@ android {
             // Shrinks and obfuscates the release build; Google Play receives the mapping file inside the bundle.
             isMinifyEnabled = true
             isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             // Includes native symbol tables in the bundle for clearer crash reports.
-            ndk { debugSymbolLevel = "SYMBOL_TABLE" }
+            ndk { debugSymbolLevel = "FULL" }
             signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
@@ -171,7 +171,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
-    packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
+    packaging {
+        resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" }
+        jniLibs { keepDebugSymbols += "**/*.so" }
+    }
 }
 
 tasks.named("preBuild") { dependsOn(generateLauncherIcon) }
@@ -187,7 +190,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.5")
     implementation("androidx.work:work-runtime-ktx:2.9.1")
     implementation("androidx.browser:browser:1.8.0")
-    implementation("com.google.android.material:material:1.12.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.jsoup:jsoup:1.17.2")

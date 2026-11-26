@@ -20,6 +20,8 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.addCallback
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -87,7 +89,10 @@ class VideoActivity : ComponentActivity() {
         content = FrameLayout(this)
         column.addView(content, LinearLayout.LayoutParams(MATCH_PARENT, 0, 1f))
         root.addView(column, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+        )
         setContentView(root)
         // Keep the controls clear of the status bar, navigation bar and any camera cut-out.
         ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
